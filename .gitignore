@@ -1,0 +1,10 @@
+/test
+/tmp
+/logs
+/conf
+/bin
+/vendor
+
+.idea/
+.vscode/
+
