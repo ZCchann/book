@@ -2,7 +2,8 @@ package main
 
 import (
 	"book/api/router"
-	"book/db/init"
+	"book/initalize/conf"
+	"book/initalize/database"
 	"github.com/gin-gonic/gin"
 	"log"
 	"os"
@@ -15,10 +16,16 @@ func main() {
 		gin.SetMode(gin.ReleaseMode)
 	}
 
+	file := "./conf/config.json"
+	log.Println("加载配置文件:", file)
+	conf.Init(file)
+
+	log.Println("初始化数据库")
+	database.InitMysql()
+
 	log.Println("初始化路由")
 	r := gin.Default()
 	router.Register(r)
-	init.InitDB()
 
 	log.Println("启动监听")
 	err := r.Run(":8080")
