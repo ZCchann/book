@@ -1,7 +1,7 @@
 /test
 /tmp
 /logs
-/conf
+/conf/config.json
 /bin
 /vendor
 

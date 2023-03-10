@@ -1,0 +1,15 @@
+{
+  "debug": false,
+  "mysql": {
+    "username": "",
+    "password": "",
+    "host": "",
+    "port": "3306",
+    "database": ""
+  },
+  "redis": {
+    "addr": "",
+    "password": "",
+    "database": 0
+  }
+}
