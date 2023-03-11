@@ -14,6 +14,7 @@ type BookData struct {
 	Price           int       // 定价
 	Press           string    // 出版社
 	Type            string    // 类型 漫画/小说
+	Restriction     int       // 判断是否为限制级 1为是限制级
 	Author          string    // 作者
 	PublicationDate time.Time // 出版日
 }
@@ -21,7 +22,7 @@ type BookData struct {
 func GetBook(ISBN string) (title string, err error) {
 	err = mysql.Mysql().DB.QueryRow("SELECT title FROM bookdata WHERE isbn = ? ", ISBN).Scan(&title)
 	if err != nil {
-		fmt.Println(err)
+		log.Fatal(err)
 		return
 	}
 	return title, err
@@ -30,15 +31,15 @@ func GetBook(ISBN string) (title string, err error) {
 func GetAllBook() (result []BookData, err error) {
 	rows, err := mysql.Mysql().DB.Query("SELECT * FROM bookdata")
 	if err != nil {
-		fmt.Println(err)
+		log.Fatal(err)
 		return result, err
 	}
 
 	for rows.Next() {
 		var f BookData
-		err = rows.Scan(&f.ID, &f.ISBN, &f.Tittle, &f.Price, &f.Press, &f.Type, &f.Author, &f.PublicationDate)
+		err = rows.Scan(&f.ID, &f.ISBN, &f.Tittle, &f.Price, &f.Press, &f.Type, &f.Restriction, &f.Author, &f.PublicationDate)
 		if err != nil {
-			fmt.Println(err)
+			log.Fatal(err)
 		}
 		result = append(result, f)
 	}
@@ -58,20 +59,23 @@ func AddBook(data BookData) error {
 		log.Fatal("tx fail")
 	}
 	// 准备sql语句
-	stmt, err := tx.Prepare("INSERT INTO bookdata (`isbn`,`title`,`price`,`press`,`Type`,`author`,`publicationDate`) VALUE (?,?,?,?,?,?,?)")
+	stmt, err := tx.Prepare("INSERT INTO bookdata (`isbn`,`title`,`price`,`press`,`Type`,`restriction`,`author`,`publicationDate`) VALUE (?,?,?,?,?,?,?)")
 	if err != nil {
 		log.Fatal("prepare fail")
 		return err
 	}
 
 	// 传参到sql中执行
-	_, err = stmt.Exec(data.ISBN, data.Tittle, data.Price, data.Press, data.Type, data.Author, data.PublicationDate)
+	_, err = stmt.Exec(data.ISBN, data.Tittle, data.Price, data.Press, data.Type, data.Restriction, data.Author, data.PublicationDate)
 	if err != nil {
-		fmt.Println("exec fail")
+		log.Fatal("exec fail")
 		return err
 	}
 	// 提交
-	tx.Commit()
+	err = tx.Commit()
+	if err != nil {
+		log.Fatal("commit error ", err)
+	}
 	return nil
 }
 
@@ -91,10 +95,13 @@ func DelBook(ISBN string) error {
 	// 传参到sql中执行
 	_, err = stmt.Exec(ISBN)
 	if err != nil {
-		fmt.Println("exec fail")
+		log.Fatal("exec fail")
 		return err
 	}
 	// 提交
-	tx.Commit()
+	err = tx.Commit()
+	if err != nil {
+		log.Fatal("commit error ", err)
+	}
 	return nil
 }

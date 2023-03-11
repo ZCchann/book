@@ -2,23 +2,22 @@ package user
 
 import (
 	"book/initalize/database/mysql"
-	"fmt"
 	"log"
 )
 
 type User struct {
-	UserName string
-	PassWord string
+	Username string
+	Password string
 }
 
-func GetUser(UserName string) (username string, err error) {
-	var name string
-	err = mysql.Mysql().DB.QueryRow("SELECT username FROM user WHERE username = ? ", UserName).Scan(&name)
+func GetUser(UserName string) (u User, err error) {
+	var data User
+	err = mysql.Mysql().DB.QueryRow("SELECT username,password FROM user WHERE username = ? ", UserName).Scan(&data.Username, &data.Password)
 	if err != nil {
-		fmt.Println(err)
+		log.Fatal(err)
 		return
 	}
-	return name, err
+	return data, err
 
 }
 
@@ -39,11 +38,14 @@ func AddUser(UserName, Password string) error {
 	// 传参到sql中执行
 	_, err = stmt.Exec(UserName, Password)
 	if err != nil {
-		fmt.Println("exec fail")
+		log.Fatal("exec fail")
 		return err
 	}
 	// 提交
-	tx.Commit()
+	err = tx.Commit()
+	if err != nil {
+		log.Fatal("commit error ", err)
+	}
 	return nil
 }
 
@@ -63,11 +65,14 @@ func DelUser(UserName string) error {
 	// 传参到sql中执行
 	_, err = stmt.Exec(UserName)
 	if err != nil {
-		fmt.Println("exec fail")
+		log.Fatal("exec fail")
 		return err
 	}
 	// 提交
-	tx.Commit()
+	err = tx.Commit()
+	if err != nil {
+		log.Fatal("commit error ", err)
+	}
 	return nil
 }
 
@@ -88,10 +93,13 @@ func UpdateUserPassword(UserName, Password string) error {
 	// 传参到sql中执行
 	_, err = stmt.Exec(Password, UserName)
 	if err != nil {
-		fmt.Println("exec fail")
+		log.Fatal("exec fail")
 		return err
 	}
 	// 提交
-	tx.Commit()
+	err = tx.Commit()
+	if err != nil {
+		log.Fatal("commit error ", err)
+	}
 	return nil
 }

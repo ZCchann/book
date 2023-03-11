@@ -18,7 +18,7 @@ func Mysql() *mdb {
 }
 
 func (m *mdb) InitDB(username, password, host, port, database string) {
-	path := strings.Join([]string{username, ":", password, "@tcp(", host, ":", port, ")/", database, "?charset=utf8"}, "")
+	path := strings.Join([]string{username, ":", password, "@tcp(", host, ":", port, ")/", database, "?charset=utf8&parseTime=true"}, "")
 	m.DB, _ = sql.Open("mysql", path)
 	m.SetConnMaxLifetime(100)
 	m.SetMaxIdleConns(10)

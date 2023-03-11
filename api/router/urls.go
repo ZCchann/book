@@ -2,6 +2,7 @@ package router
 
 import (
 	"book/api/user"
+	"book/api/views"
 	"github.com/gin-gonic/gin"
 )
 
@@ -12,4 +13,8 @@ func Register(r *gin.Engine) {
 	})
 	user.RegisterRouter(r)
 
+	group := r.Group("/book")
+	{
+		group.GET("/getAllData", views.GetAllBookData)
+	}
 }
