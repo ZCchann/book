@@ -3,6 +3,7 @@ package view
 import (
 	"book/initalize/database/mysql/user"
 	"github.com/gin-gonic/gin"
+	"log"
 	"net/http"
 )
 
@@ -14,6 +15,8 @@ func Login(c *gin.Context) {
 	}
 	u, err := user.GetUser(request.Username)
 	if err != nil {
+		log.Println("2  ", err)
+
 		c.JSON(http.StatusNotFound, "Username does not exist")
 		return
 	}

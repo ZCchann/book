@@ -8,15 +8,15 @@ import (
 )
 
 type BookData struct {
-	ID              int
-	ISBN            string    // 书ISBN号
-	Tittle          string    // 书名
-	Price           int       // 定价
-	Press           string    // 出版社
-	Type            string    // 类型 漫画/小说
-	Restriction     int       // 判断是否为限制级 1为是限制级
-	Author          string    // 作者
-	PublicationDate time.Time // 出版日
+	ID              int       `json:"id"`
+	ISBN            string    `json:"isbn"`             // 书ISBN号
+	Tittle          string    `json:"tittle"`           // 书名
+	Price           int       `json:"price"`            // 定价
+	Press           string    `json:"press"`            // 出版社
+	Type            string    `json:"type"`             // 类型 漫画/小说
+	Restriction     int       `json:"restriction"`      // 判断是否为限制级 1为是限制级
+	Author          string    `json:"author"`           // 作者
+	PublicationDate time.Time `json:"publication_date"` // 出版日
 }
 
 func GetBook(ISBN string) (title string, err error) {

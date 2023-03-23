@@ -4,6 +4,7 @@ import (
 	"book/initalize/database/mysql/book"
 	"book/pkg/response"
 	"github.com/gin-gonic/gin"
+	"log"
 )
 
 // GetAllBookData
@@ -16,4 +17,15 @@ func GetAllBookData(c *gin.Context) {
 	}
 	response.Data(c, res)
 
+}
+
+func DelBookData(c *gin.Context) {
+	isbn := c.Params.ByName("isbn")
+	err := book.DelBook(isbn)
+	if err != nil {
+		response.Error(c, err.Error())
+		log.Fatal(err.Error())
+		return
+	}
+	response.Success(c)
 }

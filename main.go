@@ -28,7 +28,7 @@ func main() {
 	router.Register(r)
 
 	log.Println("启动监听")
-	err := r.Run(":8080")
+	err := r.Run(":5000")
 	if err != nil {
 		log.Fatalln(err)
 	}
