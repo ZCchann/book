@@ -22,7 +22,7 @@ type BookData struct {
 func GetBook(ISBN string) (title string, err error) {
 	err = mysql.Mysql().DB.QueryRow("SELECT title FROM bookdata WHERE isbn = ? ", ISBN).Scan(&title)
 	if err != nil {
-		log.Fatal(err)
+		log.Println(err)
 		return
 	}
 	return title, err
@@ -31,7 +31,7 @@ func GetBook(ISBN string) (title string, err error) {
 func GetAllBook() (result []BookData, err error) {
 	rows, err := mysql.Mysql().DB.Query("SELECT * FROM bookdata")
 	if err != nil {
-		log.Fatal(err)
+		log.Println(err)
 		return result, err
 	}
 
@@ -39,7 +39,7 @@ func GetAllBook() (result []BookData, err error) {
 		var f BookData
 		err = rows.Scan(&f.ID, &f.ISBN, &f.Tittle, &f.Price, &f.Press, &f.Type, &f.Restriction, &f.Author, &f.PublicationDate)
 		if err != nil {
-			log.Fatal(err)
+			log.Println(err)
 		}
 		result = append(result, f)
 	}
@@ -56,25 +56,25 @@ func AddBook(data BookData) error {
 	}
 	tx, err := mysql.Mysql().DB.Begin()
 	if err != nil {
-		log.Fatal("tx fail")
+		log.Println("tx fail")
 	}
 	// 准备sql语句
 	stmt, err := tx.Prepare("INSERT INTO bookdata (`isbn`,`title`,`price`,`press`,`Type`,`restriction`,`author`,`publicationDate`) VALUE (?,?,?,?,?,?,?)")
 	if err != nil {
-		log.Fatal("prepare fail")
+		log.Println("prepare fail")
 		return err
 	}
 
 	// 传参到sql中执行
 	_, err = stmt.Exec(data.ISBN, data.Tittle, data.Price, data.Press, data.Type, data.Restriction, data.Author, data.PublicationDate)
 	if err != nil {
-		log.Fatal("exec fail")
+		log.Println("exec fail")
 		return err
 	}
 	// 提交
 	err = tx.Commit()
 	if err != nil {
-		log.Fatal("commit error ", err)
+		log.Println("commit error ", err)
 	}
 	return nil
 }
@@ -82,26 +82,26 @@ func AddBook(data BookData) error {
 func DelBook(ISBN string) error {
 	tx, err := mysql.Mysql().DB.Begin()
 	if err != nil {
-		log.Fatal("tx fail")
+		log.Println("tx fail")
 	}
 
 	// 准备sql语句
 	stmt, err := tx.Prepare("DELETE FROM bookdata WHERE isbn = ?")
 	if err != nil {
-		log.Fatal("prepare fail")
+		log.Println("prepare fail")
 		return err
 	}
 
 	// 传参到sql中执行
 	_, err = stmt.Exec(ISBN)
 	if err != nil {
-		log.Fatal("exec fail")
+		log.Println("exec fail")
 		return err
 	}
 	// 提交
 	err = tx.Commit()
 	if err != nil {
-		log.Fatal("commit error ", err)
+		log.Println("commit error ", err)
 	}
 	return nil
 }

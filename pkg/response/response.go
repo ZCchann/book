@@ -10,6 +10,12 @@ type Response struct {
 	Message string      `json:"message"`
 	Data    interface{} `json:"data"`
 }
+type ResponseWithPage struct {
+	Result  bool        `json:"result"`
+	Message string      `json:"message"`
+	Data    interface{} `json:"data"`
+	Total   int         `json:"total"`
+}
 type MsgResponse struct {
 	Result  bool     `json:"result"`
 	Message string   `json:"message"`
@@ -26,6 +32,9 @@ func Error(c *gin.Context, err string) {
 
 func Data(c *gin.Context, v interface{}) {
 	c.JSON(http.StatusOK, Response{Result: true, Message: "success", Data: v})
+}
+func DataWtihPage(c *gin.Context, v interface{}, total int) {
+	c.JSON(http.StatusOK, ResponseWithPage{Result: true, Message: "success", Data: v, Total: total})
 }
 
 func BadRequest(c *gin.Context, err string) {

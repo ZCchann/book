@@ -23,7 +23,7 @@ func (m *mdb) InitDB(username, password, host, port, database string) {
 	m.SetConnMaxLifetime(100)
 	m.SetMaxIdleConns(10)
 	if err := m.Ping(); err != nil {
-		log.Fatal("open database fail err: ", err)
+		log.Println("open database fail err: ", err)
 		return
 	}
 }
