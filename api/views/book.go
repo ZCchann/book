@@ -12,7 +12,7 @@ import (
 // @Router /book/getAllData[get]
 func GetAllBookData(c *gin.Context) {
 	page, _ := strconv.Atoi(c.DefaultQuery("page", "1"))
-	pageSize, _ := strconv.Atoi(c.DefaultQuery("pageSize", "10"))
+	pageSize, _ := strconv.Atoi(c.DefaultQuery("pagesize", "10"))
 	res, err := book.GetAllBook()
 	if err != nil {
 		response.Error(c, "ShouldBindJSON："+err.Error())
@@ -37,9 +37,15 @@ func GetAllBookData(c *gin.Context) {
 
 func DelBookData(c *gin.Context) {
 	isbn := c.Params.ByName("isbn")
-	err := book.DelBook(isbn)
+	_, err := book.GetBook(isbn)
 	if err != nil {
-		response.Error(c, err.Error())
+		log.Println(err)
+		response.BadRequest(c, err.Error())
+		return
+	}
+	err = book.DelBook(isbn)
+	if err != nil {
+		response.BadRequest(c, err.Error())
 		log.Println(err.Error())
 		return
 	}
