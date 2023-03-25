@@ -35,19 +35,42 @@ func GetAllBookData(c *gin.Context) {
 
 }
 
+// @Royter /book/delData/:id/[delete]
 func DelBookData(c *gin.Context) {
-	isbn := c.Params.ByName("isbn")
-	_, err := book.GetBook(isbn)
-	if err != nil {
-		log.Println(err)
-		response.BadRequest(c, err.Error())
-		return
-	}
-	err = book.DelBook(isbn)
+	id := c.Params.ByName("id")
+	err := book.DelBook(id)
 	if err != nil {
 		response.BadRequest(c, err.Error())
 		log.Println(err.Error())
 		return
 	}
 	response.Success(c)
+}
+
+func GetBookData(c *gin.Context) {
+	id := c.Params.ByName("id")
+	res, err := book.GetBook(id)
+	if err != nil {
+		response.BadRequest(c, err.Error())
+		log.Println(err.Error())
+		return
+	}
+	response.Data(c, res)
+}
+
+func EditBookData(c *gin.Context) {
+	var request book.BookData
+	if err := c.ShouldBindJSON(&request); err != nil {
+		response.Error(c, "ShouldBindJSON："+err.Error())
+		return
+	}
+
+	err := book.EditBook(request)
+	if err != nil {
+		response.BadRequest(c, err.Error())
+		log.Println(err.Error())
+		return
+	}
+	response.Success(c)
+
 }

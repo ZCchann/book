@@ -19,13 +19,15 @@ type BookData struct {
 	PublicationDate time.Time `json:"publication_date"` // 出版日
 }
 
-func GetBook(ISBN string) (title string, err error) {
-	err = mysql.Mysql().DB.QueryRow("SELECT title FROM bookdata WHERE isbn = ? ", ISBN).Scan(&title)
+func GetBook(ID string) (result []BookData, err error) {
+	var f BookData
+	err = mysql.Mysql().DB.QueryRow("SELECT * FROM bookdata WHERE id = ? ", ID).Scan(&f.ID, &f.ISBN, &f.Tittle, &f.Price, &f.Press, &f.Type, &f.Restriction, &f.Author, &f.PublicationDate)
 	if err != nil {
 		log.Println(err)
 		return
 	}
-	return title, err
+	result = append(result, f)
+	return result, err
 }
 
 func GetAllBook() (result []BookData, err error) {
@@ -50,10 +52,13 @@ func GetAllBook() (result []BookData, err error) {
 
 func AddBook(data BookData) error {
 	check, _ := GetBook(data.ISBN)
-	if check != "" {
-		err := fmt.Errorf("Book duplication")
-		return err
+	for _, v := range check {
+		if v.ISBN != "" {
+			err := fmt.Errorf("Book duplication")
+			return err
+		}
 	}
+
 	tx, err := mysql.Mysql().DB.Begin()
 	if err != nil {
 		log.Println("tx fail")
@@ -79,21 +84,21 @@ func AddBook(data BookData) error {
 	return nil
 }
 
-func DelBook(ISBN string) error {
+func DelBook(ID string) error {
 	tx, err := mysql.Mysql().DB.Begin()
 	if err != nil {
 		log.Println("tx fail")
 	}
 
 	// 准备sql语句
-	stmt, err := tx.Prepare("DELETE FROM bookdata WHERE isbn = ?")
+	stmt, err := tx.Prepare("DELETE FROM bookdata WHERE id = ?")
 	if err != nil {
 		log.Println("prepare fail")
 		return err
 	}
 
 	// 传参到sql中执行
-	_, err = stmt.Exec(ISBN)
+	_, err = stmt.Exec(ID)
 	if err != nil {
 		log.Println("exec fail")
 		return err
@@ -103,5 +108,20 @@ func DelBook(ISBN string) error {
 	if err != nil {
 		log.Println("commit error ", err)
 	}
+	return nil
+}
+
+func EditBook(data BookData) (err error) {
+	sqlStr := "UPDATE bookdata SET isbn=? ,title=? ,price=? ,press=? ,type=? ,restriction=? ,author=? WHERE id=?"
+	res, err := mysql.Mysql().DB.Exec(sqlStr, data.ISBN, data.Tittle, data.Price, data.Price, data.Type, data.Restriction, data.Author, data.ID)
+	if err != nil {
+		log.Println("exec fail ", err)
+		return err
+	}
+	num, err := res.RowsAffected()
+	if err != nil {
+		log.Println("commit error ", err)
+	}
+	log.Println(num)
 	return nil
 }

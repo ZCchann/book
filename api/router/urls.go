@@ -17,6 +17,8 @@ func Register(r *gin.Engine) {
 	group := r.Group("/book")
 	{
 		group.GET("/getAllData", views.GetAllBookData)
-		group.DELETE("/delData/:isbn/", views.DelBookData)
+		group.GET("/getData/:id/", views.GetBookData)
+		group.POST("/editData", views.EditBookData)
+		group.DELETE("/delData/:id/", views.DelBookData)
 	}
 }
