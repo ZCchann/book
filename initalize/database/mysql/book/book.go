@@ -2,7 +2,6 @@ package book
 
 import (
 	"book/initalize/database/mysql"
-	"fmt"
 	"log"
 	"time"
 )
@@ -19,6 +18,7 @@ type BookData struct {
 	PublicationDate time.Time `json:"publication_date"` // 出版日
 }
 
+//GetBook 获取单条图书数据
 func GetBook(ID string) (result []BookData, err error) {
 	var f BookData
 	err = mysql.Mysql().DB.QueryRow("SELECT * FROM bookdata WHERE id = ? ", ID).Scan(&f.ID, &f.ISBN, &f.Tittle, &f.Price, &f.Press, &f.Type, &f.Restriction, &f.Author, &f.PublicationDate)
@@ -42,6 +42,7 @@ func GetAllBook() (result []BookData, err error) {
 		err = rows.Scan(&f.ID, &f.ISBN, &f.Tittle, &f.Price, &f.Press, &f.Type, &f.Restriction, &f.Author, &f.PublicationDate)
 		if err != nil {
 			log.Println(err)
+			return nil, err
 		}
 		result = append(result, f)
 	}
@@ -50,21 +51,14 @@ func GetAllBook() (result []BookData, err error) {
 
 }
 
+//AddBook 新增图书数据
 func AddBook(data BookData) error {
-	check, _ := GetBook(data.ISBN)
-	for _, v := range check {
-		if v.ISBN != "" {
-			err := fmt.Errorf("Book duplication")
-			return err
-		}
-	}
-
 	tx, err := mysql.Mysql().DB.Begin()
 	if err != nil {
 		log.Println("tx fail")
 	}
 	// 准备sql语句
-	stmt, err := tx.Prepare("INSERT INTO bookdata (`isbn`,`title`,`price`,`press`,`Type`,`restriction`,`author`,`publicationDate`) VALUE (?,?,?,?,?,?,?)")
+	stmt, err := tx.Prepare("INSERT INTO bookdata (`isbn`,`title`,`price`,`press`,`Type`,`restriction`,`author`,`publicationDate`) VALUE (?,?,?,?,?,?,?,?)")
 	if err != nil {
 		log.Println("prepare fail")
 		return err
@@ -80,6 +74,7 @@ func AddBook(data BookData) error {
 	err = tx.Commit()
 	if err != nil {
 		log.Println("commit error ", err)
+		return err
 	}
 	return nil
 }
@@ -112,16 +107,21 @@ func DelBook(ID string) error {
 }
 
 func EditBook(data BookData) (err error) {
-	sqlStr := "UPDATE bookdata SET isbn=? ,title=? ,price=? ,press=? ,type=? ,restriction=? ,author=? WHERE id=?"
-	res, err := mysql.Mysql().DB.Exec(sqlStr, data.ISBN, data.Tittle, data.Price, data.Price, data.Type, data.Restriction, data.Author, data.ID)
+	tx, err := mysql.Mysql().DB.Begin()
+	if err != nil {
+		log.Println("tx fail")
+		return err
+	}
+	stmt, err := tx.Prepare("UPDATE bookdata SET isbn=? ,title=? ,price=? ,press=? ,type=? ,restriction=? ,author=? WHERE id=?")
+	if err != nil {
+		log.Println("Prepare fail ", err)
+		return err
+	}
+	_, err = stmt.Exec(data.ISBN, data.Tittle, data.Price, data.Press, data.Type, data.Restriction, data.Author, data.ID)
 	if err != nil {
 		log.Println("exec fail ", err)
 		return err
 	}
-	num, err := res.RowsAffected()
-	if err != nil {
-		log.Println("commit error ", err)
-	}
-	log.Println(num)
+	tx.Commit()
 	return nil
 }

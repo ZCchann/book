@@ -8,7 +8,7 @@ import (
 	"strconv"
 )
 
-// GetAllBookData
+// GetAllBookData 按照前端所需数量 返回数据库中数据给前端
 // @Router /book/getAllData[get]
 func GetAllBookData(c *gin.Context) {
 	page, _ := strconv.Atoi(c.DefaultQuery("page", "1"))
@@ -73,4 +73,19 @@ func EditBookData(c *gin.Context) {
 	}
 	response.Success(c)
 
+}
+
+func AddBookData(c *gin.Context) {
+	var request book.BookData
+	if err := c.ShouldBindJSON(&request); err != nil {
+		response.Error(c, "ShouldBindJSON："+err.Error())
+		return
+	}
+	err := book.AddBook(request)
+	if err != nil {
+		response.BadRequest(c, err.Error())
+		log.Println(err.Error())
+		return
+	}
+	response.Success(c)
 }

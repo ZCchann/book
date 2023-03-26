@@ -4,6 +4,7 @@ import (
 	"book/initalize/database/mysql/user"
 	"book/pkg/response"
 	"github.com/gin-gonic/gin"
+	"strconv"
 )
 
 func AddUser(c *gin.Context) {
@@ -64,4 +65,28 @@ func DeleteUser(c *gin.Context) {
 		return
 	}
 	response.Success(c)
+}
+
+func GetAllUser(c *gin.Context) {
+	page, _ := strconv.Atoi(c.DefaultQuery("page", "1"))
+	pageSize, _ := strconv.Atoi(c.DefaultQuery("pagesize", "10"))
+	res, err := user.GetAllUser()
+	if err != nil {
+		response.Error(c, "ShouldBindJSON："+err.Error())
+		return
+	}
+	sPage := page*pageSize - pageSize //起始index
+	ePage := page * pageSize          //结束index
+	total := len(res)                 //数据总页数
+
+	//分页
+	if len(res) < pageSize-1 {
+		response.DataWtihPage(c, res, total)
+	} else if ePage > total {
+		ret := res[sPage:total]
+		response.DataWtihPage(c, ret, total)
+	} else {
+		ret := res[sPage : ePage-1]
+		response.DataWtihPage(c, ret, total)
+	}
 }

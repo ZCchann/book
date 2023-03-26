@@ -6,8 +6,9 @@ import (
 )
 
 type User struct {
-	Username string
-	Password string
+	Username string `json:"username"`
+	Password string `json:"password"`
+	Email    string `json:"email"`
 }
 
 func GetUser(UserName string) (u User, err error) {
@@ -19,6 +20,26 @@ func GetUser(UserName string) (u User, err error) {
 	}
 	return data, err
 
+}
+
+//GetAllUser 获取所有用户的用户名
+func GetAllUser() (result []User, err error) {
+	rows, err := mysql.Mysql().DB.Query("SELECT username,email FROM user")
+	if err != nil {
+		log.Println(err)
+		return result, err
+	}
+	for rows.Next() {
+		var f User
+		err = rows.Scan(&f.Username, &f.Email)
+		if err != nil {
+			log.Println(err)
+			return nil, err
+		}
+		result = append(result, f)
+	}
+
+	return result, err
 }
 
 //AddUser 新增用户
