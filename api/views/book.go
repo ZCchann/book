@@ -35,7 +35,7 @@ func GetAllBookData(c *gin.Context) {
 
 }
 
-// @Royter /book/delData/:id/[delete]
+// DelBookData @Royter /book/delData/:id/[delete]
 func DelBookData(c *gin.Context) {
 	id := c.Params.ByName("id")
 	err := book.DelBook(id)

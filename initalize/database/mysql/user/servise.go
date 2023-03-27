@@ -6,11 +6,13 @@ import (
 )
 
 type User struct {
+	Id       string `json:"id"`
 	Username string `json:"username"`
 	Password string `json:"password"`
 	Email    string `json:"email"`
 }
 
+//GetUser 通过用户名获取用户信息
 func GetUser(UserName string) (u User, err error) {
 	var data User
 	err = mysql.Mysql().DB.QueryRow("SELECT username,password FROM user WHERE username = ? ", UserName).Scan(&data.Username, &data.Password)
@@ -22,16 +24,28 @@ func GetUser(UserName string) (u User, err error) {
 
 }
 
+//GetUserForID 通过ID获取用户信息 不含密码
+func GetUserForID(ID string) (u User, err error) {
+	var data User
+	err = mysql.Mysql().DB.QueryRow("SELECT id,username,email FROM user WHERE id = ? ", ID).Scan(&data.Id, &data.Username, &data.Email)
+	if err != nil {
+		log.Println(err.Error())
+		return
+	}
+	return data, err
+
+}
+
 //GetAllUser 获取所有用户的用户名
 func GetAllUser() (result []User, err error) {
-	rows, err := mysql.Mysql().DB.Query("SELECT username,email FROM user")
+	rows, err := mysql.Mysql().DB.Query("SELECT id,username,email FROM user")
 	if err != nil {
 		log.Println(err)
 		return result, err
 	}
 	for rows.Next() {
 		var f User
-		err = rows.Scan(&f.Username, &f.Email)
+		err = rows.Scan(&f.Id, &f.Username, &f.Email)
 		if err != nil {
 			log.Println(err)
 			return nil, err

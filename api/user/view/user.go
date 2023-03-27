@@ -4,6 +4,7 @@ import (
 	"book/initalize/database/mysql/user"
 	"book/pkg/response"
 	"github.com/gin-gonic/gin"
+	"log"
 	"strconv"
 )
 
@@ -89,4 +90,15 @@ func GetAllUser(c *gin.Context) {
 		ret := res[sPage : ePage-1]
 		response.DataWtihPage(c, ret, total)
 	}
+}
+
+func GetOneUser(c *gin.Context) {
+	id := c.Params.ByName("id")
+	res, err := user.GetUserForID(id)
+	if err != nil {
+		response.BadRequest(c, err.Error())
+		log.Println(err.Error())
+		return
+	}
+	response.Data(c, res)
 }
