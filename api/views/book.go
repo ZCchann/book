@@ -35,7 +35,7 @@ func GetAllBookData(c *gin.Context) {
 
 }
 
-// DelBookData @Royter /book/delData/:id/[delete]
+// DelBookData @Router /book/delData/[delete]
 func DelBookData(c *gin.Context) {
 	id := c.Params.ByName("id")
 	err := book.DelBook(id)
@@ -47,6 +47,8 @@ func DelBookData(c *gin.Context) {
 	response.Success(c)
 }
 
+// GetBookData
+// @Router /book/getData/:id/[GET]
 func GetBookData(c *gin.Context) {
 	id := c.Params.ByName("id")
 	res, err := book.GetBook(id)
@@ -58,6 +60,8 @@ func GetBookData(c *gin.Context) {
 	response.Data(c, res)
 }
 
+// EditBookData
+// @Router /book/editData[POST]
 func EditBookData(c *gin.Context) {
 	var request book.BookData
 	if err := c.ShouldBindJSON(&request); err != nil {
@@ -75,6 +79,8 @@ func EditBookData(c *gin.Context) {
 
 }
 
+// AddBookData
+// @Router /book/addData[POST]
 func AddBookData(c *gin.Context) {
 	var request book.BookData
 	if err := c.ShouldBindJSON(&request); err != nil {
@@ -88,4 +94,34 @@ func AddBookData(c *gin.Context) {
 		return
 	}
 	response.Success(c)
+
+}
+
+// SearchBookData
+// @Router /book/search/?title=bookTitle [GET]
+func SearchBookData(c *gin.Context) {
+	title := c.Query("title")
+	page, _ := strconv.Atoi(c.DefaultQuery("page", "1"))
+	pageSize, _ := strconv.Atoi(c.DefaultQuery("pagesize", "10"))
+	res, err := book.SearchBook(title)
+	if err != nil {
+		response.BadRequest(c, err.Error())
+		log.Println(err.Error())
+		return
+	}
+
+	sPage := page*pageSize - pageSize //起始index
+	ePage := page * pageSize          //结束index
+	total := len(res)                 //数据总页数
+
+	//分页
+	if len(res) < pageSize-1 {
+		response.DataWtihPage(c, res, total)
+	} else if ePage > total {
+		ret := res[sPage:total]
+		response.DataWtihPage(c, ret, total)
+	} else {
+		ret := res[sPage : ePage-1]
+		response.DataWtihPage(c, ret, total)
+	}
 }

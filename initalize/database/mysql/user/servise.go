@@ -25,8 +25,7 @@ func GetUser(UserName string) (u User, err error) {
 }
 
 //GetUserForID 通过ID获取用户信息 不含密码
-func GetUserForID(ID string) (u User, err error) {
-	var data User
+func GetUserForID(ID string) (data User, err error) {
 	err = mysql.Mysql().DB.QueryRow("SELECT id,username,email FROM user WHERE id = ? ", ID).Scan(&data.Id, &data.Username, &data.Email)
 	if err != nil {
 		log.Println(err.Error())
@@ -57,21 +56,21 @@ func GetAllUser() (result []User, err error) {
 }
 
 //AddUser 新增用户
-func AddUser(UserName, Password string) error {
+func AddUser(UserName, Password, Email string) error {
 	tx, err := mysql.Mysql().DB.Begin()
 	if err != nil {
 		log.Println("tx fail")
 	}
 
 	// 准备sql语句
-	stmt, err := tx.Prepare("INSERT INTO user (`username`,`password`) VALUE (?,?)")
+	stmt, err := tx.Prepare("INSERT INTO user (`username`,`password`,`email`) VALUE (?,?,?)")
 	if err != nil {
 		log.Println("prepare fail")
 		return err
 	}
 
 	// 传参到sql中执行
-	_, err = stmt.Exec(UserName, Password)
+	_, err = stmt.Exec(UserName, Password, Email)
 	if err != nil {
 		log.Println("exec fail")
 		return err
@@ -84,21 +83,21 @@ func AddUser(UserName, Password string) error {
 	return nil
 }
 
-func DelUser(UserName string) error {
+func DelUser(ID string) error {
 	tx, err := mysql.Mysql().DB.Begin()
 	if err != nil {
 		log.Println("tx fail")
 	}
 
 	// 准备sql语句
-	stmt, err := tx.Prepare("DELETE FROM user WHERE username = ?")
+	stmt, err := tx.Prepare("DELETE FROM user WHERE id = ?")
 	if err != nil {
 		log.Println("prepare fail")
 		return err
 	}
 
 	// 传参到sql中执行
-	_, err = stmt.Exec(UserName)
+	_, err = stmt.Exec(ID)
 	if err != nil {
 		log.Println("exec fail")
 		return err

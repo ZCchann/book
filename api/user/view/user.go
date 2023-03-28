@@ -9,22 +9,15 @@ import (
 )
 
 func AddUser(c *gin.Context) {
-	var request loginRequest
+	var request user.User
 	if err := c.ShouldBindJSON(&request); err != nil {
 		response.Error(c, "ShouldBindJSON："+err.Error())
 		return
 	}
-	if request.Username == "" {
-		response.BadRequest(c, "`username` is required")
-		return
-	}
-	if request.Password == "" {
-		response.BadRequest(c, "`password` is required")
-		return
-	}
-
-	if err := user.AddUser(request.Username, request.Password); err != nil {
-		response.Error(c, err.Error())
+	err := user.AddUser(request.Username, request.Password, request.Email)
+	if err != nil {
+		response.BadRequest(c, err.Error())
+		log.Println(err.Error())
 		return
 	}
 	response.Success(c)
@@ -54,13 +47,13 @@ func UpdatePassword(c *gin.Context) {
 }
 
 func DeleteUser(c *gin.Context) {
-	username := c.Params.ByName("username")
-	if username == "" {
-		response.BadRequest(c, "`username` is required")
+	id := c.Params.ByName("id")
+	if id == "" {
+		response.BadRequest(c, "`id` is required")
 		return
 	}
 
-	err := user.DelUser(username)
+	err := user.DelUser(id)
 	if err != nil {
 		response.Error(c, err.Error())
 		return

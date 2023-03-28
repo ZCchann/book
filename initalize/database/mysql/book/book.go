@@ -2,6 +2,7 @@ package book
 
 import (
 	"book/initalize/database/mysql"
+	"fmt"
 	"log"
 	"time"
 )
@@ -19,14 +20,14 @@ type BookData struct {
 }
 
 //GetBook 获取单条图书数据
-func GetBook(ID string) (result []BookData, err error) {
-	var f BookData
-	err = mysql.Mysql().DB.QueryRow("SELECT * FROM bookdata WHERE id = ? ", ID).Scan(&f.ID, &f.ISBN, &f.Tittle, &f.Price, &f.Press, &f.Type, &f.Restriction, &f.Author, &f.PublicationDate)
+func GetBook(ID string) (result BookData, err error) {
+	err = mysql.Mysql().DB.QueryRow("SELECT * FROM bookdata WHERE id = ? ", ID).Scan(&result.ID, &result.ISBN,
+		&result.Tittle, &result.Price, &result.Press, &result.Type,
+		&result.Restriction, &result.Author, &result.PublicationDate)
 	if err != nil {
 		log.Println(err)
 		return
 	}
-	result = append(result, f)
 	return result, err
 }
 
@@ -124,4 +125,24 @@ func EditBook(data BookData) (err error) {
 	}
 	tx.Commit()
 	return nil
+}
+
+func SearchBook(title string) (result []BookData, err error) {
+	rows, err := mysql.Mysql().DB.Query(fmt.Sprintf("SELECT * from bookdata where title REGEXP '%s';", title))
+	if err != nil {
+		log.Println(err)
+		return result, err
+	}
+	rows.Scan()
+	for rows.Next() {
+		var f BookData
+		err = rows.Scan(&f.ID, &f.ISBN, &f.Tittle, &f.Price, &f.Press, &f.Type, &f.Restriction, &f.Author, &f.PublicationDate)
+		if err != nil {
+			log.Println(err)
+			return nil, err
+		}
+		result = append(result, f)
+	}
+
+	return result, err
 }
