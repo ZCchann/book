@@ -8,7 +8,7 @@ import (
 	"strconv"
 )
 
-// AddUser
+//AddUser 添加用户
 func AddUser(c *gin.Context) {
 	var request user.User
 	if err := c.ShouldBindJSON(&request); err != nil {
@@ -49,13 +49,13 @@ func AddUser(c *gin.Context) {
 //}
 
 func DeleteUser(c *gin.Context) {
-	id := c.Params.ByName("id")
-	if id == "" {
-		response.BadRequest(c, "`id` is required")
+	uuid := c.Params.ByName("uuid")
+	if uuid == "" {
+		response.BadRequest(c, "`uuid` is required")
 		return
 	}
 
-	err := user.DelUser(id)
+	err := user.DelUser(uuid)
 	if err != nil {
 		response.Error(c, err.Error())
 		return
@@ -88,8 +88,8 @@ func GetAllUser(c *gin.Context) {
 }
 
 func GetOneUser(c *gin.Context) {
-	id := c.Params.ByName("id")
-	res, err := user.GetUserForID(id)
+	uuid := c.Params.ByName("uuid")
+	res, err := user.GetUserForID(uuid)
 	if err != nil {
 		response.BadRequest(c, err.Error())
 		log.Println(err.Error())
@@ -98,6 +98,7 @@ func GetOneUser(c *gin.Context) {
 	response.Data(c, res)
 }
 
+//SearchUserData 搜索用户数据
 func SearchUserData(c *gin.Context) {
 	username := c.Query("username")
 	page, _ := strconv.Atoi(c.DefaultQuery("page", "1"))
@@ -125,28 +126,24 @@ func SearchUserData(c *gin.Context) {
 	}
 }
 
-//UpdateUser
-// Route /updateUser [POST]
+//UpdateUser 更新用户信息
+// @Route /updateUser [POST]
 func UpdateUser(c *gin.Context) {
 	var request user.User
 	if err := c.ShouldBindJSON(&request); err != nil {
 		response.Error(c, "ShouldBindJSON："+err.Error())
 		return
 	}
-	log.Println(request.Id)
-	log.Println(request.Email)
-	log.Println(request.Password)
+
 	if request.Password != "" {
-		log.Println("1")
-		err := user.UpdateUserPassword(request.Id, request.Email, request.Password)
+		err := user.UpdateUserPassword(request.UUID, request.Email, request.Password)
 		if err != nil {
 			response.Error(c, err.Error())
 			return
 		}
 		response.Success(c)
 	} else {
-		log.Println("2")
-		err := user.UpdateUserEmail(request.Id, request.Email)
+		err := user.UpdateUserEmail(request.UUID, request.Email)
 		if err != nil {
 			log.Println(err)
 			response.Error(c, err.Error())

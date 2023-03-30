@@ -112,12 +112,12 @@ func EditBook(data BookData) (err error) {
 		log.Println("tx fail")
 		return err
 	}
-	stmt, err := tx.Prepare("UPDATE bookdata SET isbn=? ,title=? ,price=? ,press=? ,type=? ,restriction=? ,author=? WHERE id=?")
+	stmt, err := tx.Prepare("UPDATE bookdata SET isbn=? ,title=? ,price=? ,press=? ,type=? ,restriction=? ,author=? ,publicationDate=? WHERE id=?")
 	if err != nil {
 		log.Println("Prepare fail ", err)
 		return err
 	}
-	_, err = stmt.Exec(data.ISBN, data.Tittle, data.Price, data.Press, data.Type, data.Restriction, data.Author, data.ID)
+	_, err = stmt.Exec(data.ISBN, data.Tittle, data.Price, data.Press, data.Type, data.Restriction, data.Author, data.PublicationDate, data.ID)
 	if err != nil {
 		log.Println("exec fail ", err)
 		return err

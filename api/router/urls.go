@@ -21,6 +21,7 @@ func Register(r *gin.Engine) {
 		group.GET("/search/", views.SearchBookData)
 		group.POST("/addData", views.AddBookData)
 		group.POST("/editData", views.EditBookData)
+		group.POST("/fileUpdate", views.FileUpdate)
 		group.DELETE("/delData/:id/", views.DelBookData)
 	}
 }

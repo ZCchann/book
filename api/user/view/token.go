@@ -28,6 +28,6 @@ func Login(c *gin.Context) {
 	//	c.JSON(http.StatusInternalServerError, err.Error())
 	//	return
 	//}
-
-	c.JSON(http.StatusOK, map[string]string{"jwt": "token123456789"}) //test
+	uuid := u.UUID
+	c.JSON(http.StatusOK, map[string]string{"jwt": "token123456789", "uuid": uuid}) //test
 }

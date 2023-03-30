@@ -11,10 +11,10 @@ func RegisterRouter(r *gin.Engine) {
 	group := r.Group("/user")
 	{
 		group.GET("/getAllUser", view.GetAllUser)
-		group.GET("/getUser/:id/", view.GetOneUser)
+		group.GET("/getUser/:uuid/", view.GetOneUser)
 		group.GET("/search/", view.SearchUserData)
 		group.POST("/addUser", view.AddUser)
 		group.POST("/updateUser", view.UpdateUser)
-		group.DELETE("/delUser/:id/", view.DeleteUser)
+		group.DELETE("/delUser/:uuid/", view.DeleteUser)
 	}
 }

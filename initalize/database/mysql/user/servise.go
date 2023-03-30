@@ -11,12 +11,13 @@ type User struct {
 	Username string `json:"username"`
 	Password string `json:"password"`
 	Email    string `json:"email"`
+	UUID     string `json:"uuid"`
 }
 
 //GetUser 通过用户名获取用户信息
 func GetUser(UserName string) (u User, err error) {
 	var data User
-	err = mysql.Mysql().DB.QueryRow("SELECT username,password FROM user WHERE username = ? ", UserName).Scan(&data.Username, &data.Password)
+	err = mysql.Mysql().DB.QueryRow("SELECT username,password,uuid FROM user WHERE username = ? ", UserName).Scan(&data.Username, &data.Password, &data.UUID)
 	if err != nil {
 		log.Println(err.Error())
 		return
@@ -26,8 +27,8 @@ func GetUser(UserName string) (u User, err error) {
 }
 
 //GetUserForID 通过ID获取用户信息 不含密码
-func GetUserForID(ID string) (data User, err error) {
-	err = mysql.Mysql().DB.QueryRow("SELECT id,username,email FROM user WHERE id = ? ", ID).Scan(&data.Id, &data.Username, &data.Email)
+func GetUserForID(uuid string) (data User, err error) {
+	err = mysql.Mysql().DB.QueryRow("SELECT uuid,username,email FROM user WHERE uuid = ? ", uuid).Scan(&data.UUID, &data.Username, &data.Email)
 	if err != nil {
 		log.Println(err.Error())
 		return
@@ -38,14 +39,14 @@ func GetUserForID(ID string) (data User, err error) {
 
 //GetAllUser 获取所有用户的用户名
 func GetAllUser() (result []User, err error) {
-	rows, err := mysql.Mysql().DB.Query("SELECT id,username,email FROM user")
+	rows, err := mysql.Mysql().DB.Query("SELECT id,username,email,uuid FROM user")
 	if err != nil {
 		log.Println(err)
 		return result, err
 	}
 	for rows.Next() {
 		var f User
-		err = rows.Scan(&f.Id, &f.Username, &f.Email)
+		err = rows.Scan(&f.Id, &f.Username, &f.Email, &f.UUID)
 		if err != nil {
 			log.Println(err)
 			return nil, err
@@ -64,7 +65,7 @@ func AddUser(UserName, Password, Email string) error {
 	}
 
 	// 准备sql语句
-	stmt, err := tx.Prepare("INSERT INTO user (`username`,`password`,`email`) VALUE (?,?,?)")
+	stmt, err := tx.Prepare("INSERT INTO user (`username`,`password`,`email`,`uuid`) VALUE (?,?,?,replace(uuid(),\"-\",\"\"))")
 	if err != nil {
 		log.Println("prepare fail")
 		return err
@@ -84,21 +85,21 @@ func AddUser(UserName, Password, Email string) error {
 	return nil
 }
 
-func DelUser(ID string) error {
+func DelUser(UUID string) error {
 	tx, err := mysql.Mysql().DB.Begin()
 	if err != nil {
 		log.Println("tx fail")
 	}
 
 	// 准备sql语句
-	stmt, err := tx.Prepare("DELETE FROM user WHERE id = ?")
+	stmt, err := tx.Prepare("DELETE FROM user WHERE uuid = ?")
 	if err != nil {
 		log.Println("prepare fail")
 		return err
 	}
 
 	// 传参到sql中执行
-	_, err = stmt.Exec(ID)
+	_, err = stmt.Exec(UUID)
 	if err != nil {
 		log.Println("exec fail")
 		return err
@@ -112,21 +113,21 @@ func DelUser(ID string) error {
 }
 
 //UpdateUserPassword 更新用户密码
-func UpdateUserPassword(id, Email, Password string) error {
+func UpdateUserPassword(uuid, Email, Password string) error {
 	tx, err := mysql.Mysql().DB.Begin()
 	if err != nil {
 		log.Println("tx fail")
 	}
 
 	// 准备sql语句
-	stmt, err := tx.Prepare("UPDATE user SET password = ?, email= ? WHERE id = ?")
+	stmt, err := tx.Prepare("UPDATE user SET password = ?, email= ? WHERE uuid = ?")
 	if err != nil {
 		log.Println("prepare fail")
 		return err
 	}
 
 	// 传参到sql中执行
-	_, err = stmt.Exec(Password, Email, id)
+	_, err = stmt.Exec(Password, Email, uuid)
 	if err != nil {
 		log.Println("exec fail")
 		return err
@@ -159,7 +160,7 @@ func SearchUser(username string) (result []User, err error) {
 	return result, err
 }
 
-func UpdateUserEmail(id, email string) (err error) {
+func UpdateUserEmail(uuid, email string) (err error) {
 	tx, err := mysql.Mysql().DB.Begin()
 	if err != nil {
 		log.Println("tx fail")
@@ -167,14 +168,14 @@ func UpdateUserEmail(id, email string) (err error) {
 	}
 
 	// 准备sql语句
-	stmt, err := tx.Prepare("UPDATE user SET email = ? WHERE id = ?")
+	stmt, err := tx.Prepare("UPDATE user SET email = ? WHERE uuid = ?")
 	if err != nil {
 		log.Println("prepare fail")
 		return err
 	}
 
 	// 传参到sql中执行
-	_, err = stmt.Exec(email, id)
+	_, err = stmt.Exec(email, uuid)
 	if err != nil {
 		log.Println("exec fail")
 		return err
