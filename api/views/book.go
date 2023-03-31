@@ -24,16 +24,13 @@ func GetAllBookData(c *gin.Context) {
 	total := len(res)                 //数据总页数
 
 	//分页
-	if len(res) < pageSize-1 {
-		response.DataWtihPage(c, res, total)
-	} else if ePage > total {
+	if page > 1 && ePage > total {
 		ret := res[sPage:total]
 		response.DataWtihPage(c, ret, total)
 	} else {
-		ret := res[sPage : ePage-1]
+		ret := res[sPage:ePage]
 		response.DataWtihPage(c, ret, total)
 	}
-
 }
 
 // DelBookData @Router /book/delData/[delete]
