@@ -1,0 +1,24 @@
+package order
+
+type OrderForm struct {
+	Number     string `json:"number"`
+	CreateTime int    `json:"create_time"`
+}
+
+type OrderList struct {
+	BookID     int `json:"id"`
+	Amount     int `json:"amount"`
+	TotalPrice int `json:"total_price"`
+}
+
+type OrderDetails struct {
+	Number          string `json:"number"`
+	Amount          int    `json:"amount"`
+	TotalPrice      int    `json:"total_price"`
+	ISBN            string `json:"isbn"`             // 书ISBN号
+	Title           string `json:"title"`            // 书名
+	Type            string `json:"type"`             // 类型 漫画/小说
+	Price           int    `json:"price"`            // 定价
+	PublicationDate string `json:"publication_date"` // 出版日
+	Press           string `json:"press"`            // 出版社
+}

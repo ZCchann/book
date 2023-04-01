@@ -1,4 +1,4 @@
-package views
+package bookData
 
 import (
 	"book/initalize/database/mysql/book"
@@ -86,7 +86,6 @@ func AddBookData(c *gin.Context) {
 		response.Error(c, "ShouldBindJSON："+err.Error())
 		return
 	}
-	log.Println(request)
 	err := book.AddBook(request)
 	if err != nil {
 		response.BadRequest(c, err.Error())

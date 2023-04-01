@@ -2,7 +2,8 @@ package router
 
 import (
 	"book/api/user"
-	"book/api/views"
+	"book/api/views/bookData"
+	"book/api/views/order"
 	"book/pkg/grf/middleware"
 	"github.com/gin-gonic/gin"
 )
@@ -14,14 +15,22 @@ func Register(r *gin.Engine) {
 	})
 	user.RegisterRouter(r)
 
-	group := r.Group("/book")
+	book := r.Group("/book")
 	{
-		group.GET("/getAllData", views.GetAllBookData)
-		group.GET("/getData/:id/", views.GetBookData)
-		group.GET("/search/", views.SearchBookData)
-		group.POST("/addData", views.AddBookData)
-		group.POST("/editData", views.EditBookData)
-		group.POST("/fileUpdate", views.FileUpdate)
-		group.DELETE("/delData/:id/", views.DelBookData)
+		book.GET("/getAllData", bookData.GetAllBookData)
+		book.GET("/getData/:id/", bookData.GetBookData)
+		book.GET("/search/", bookData.SearchBookData)
+		book.POST("/addData", bookData.AddBookData)
+		book.POST("/editData", bookData.EditBookData)
+		book.POST("/fileUpdate", bookData.FileUpdate)
+		book.DELETE("/delData/:id/", bookData.DelBookData)
+	}
+
+	orderList := r.Group("/order")
+	{
+		orderList.GET("/get_order", order.GetOrder)
+		orderList.GET("/get_order_details", order.GetOrderDetails)
+		orderList.POST("/create", order.CreateOrder)
+
 	}
 }
