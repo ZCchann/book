@@ -9,14 +9,14 @@ import (
 )
 
 //新建订单
-func CreateOrder(uuid string) (number string, err error) {
+func CreateOrder(uuid string, addressID int) (number string, err error) {
 	tx, err := mysql.Mysql().DB.Begin()
 	if err != nil {
 		log.Println("tx fail")
 	}
 
 	// 准备sql语句
-	stmt, err := tx.Prepare("INSERT INTO orderform (`uuid`,`create_time`) VALUE (?,?)")
+	stmt, err := tx.Prepare("INSERT INTO orderform (`uuid`,`create_time`,`address_id`) VALUE (?,?,?)")
 	if err != nil {
 		log.Println("prepare fail")
 		return "", err
@@ -26,7 +26,7 @@ func CreateOrder(uuid string) (number string, err error) {
 	TimeStamp := time.Now().Unix()
 
 	// 传参到sql中执行
-	_, err = stmt.Exec(uuid, TimeStamp)
+	_, err = stmt.Exec(uuid, TimeStamp, addressID)
 	if err != nil {
 		log.Println("exec fail")
 		return "", err
@@ -99,7 +99,7 @@ func AddOrderList(orderList []OrderList, orderNumber string) (err []string) {
 
 // GetOrderList 获取订单信息
 func GetOrderList(uuid string) (result []OrderForm, err error) {
-	rows, err := mysql.Mysql().DB.Query("select number,create_time from orderform where uuid=?;", uuid)
+	rows, err := mysql.Mysql().DB.Query("SELECT address.addressee, address.telephone, address.address, orderform.number, orderform.create_time FROM orderform, address WHERE orderform.address_id = address.address_id  AND orderform.uuid = ?;", uuid)
 	if err != nil {
 		log.Println("1 ", err)
 		return
@@ -107,9 +107,9 @@ func GetOrderList(uuid string) (result []OrderForm, err error) {
 
 	for rows.Next() {
 		var f OrderForm
-		err = rows.Scan(&f.Number, &f.CreateTime)
+		err = rows.Scan(&f.Addressee, &f.Telephone, &f.Address, &f.Number, &f.CreateTime)
 		if err != nil {
-			log.Println("2 ", err)
+			log.Println(err)
 			return nil, err
 		}
 		result = append(result, f)

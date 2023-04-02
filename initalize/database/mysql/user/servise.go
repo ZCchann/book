@@ -81,6 +81,7 @@ func AddUser(UserName, Password, Email string) error {
 	err = tx.Commit()
 	if err != nil {
 		log.Println("commit error ", err)
+		return err
 	}
 	return nil
 }
@@ -108,6 +109,7 @@ func DelUser(UUID string) error {
 	err = tx.Commit()
 	if err != nil {
 		log.Println("commit error ", err)
+		return err
 	}
 	return nil
 }
@@ -136,6 +138,7 @@ func UpdateUserPassword(uuid, Email, Password string) error {
 	err = tx.Commit()
 	if err != nil {
 		log.Println("commit error ", err)
+		return err
 	}
 	return nil
 }

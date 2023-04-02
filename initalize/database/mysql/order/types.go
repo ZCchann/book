@@ -3,12 +3,20 @@ package order
 type OrderForm struct {
 	Number     string `json:"number"`
 	CreateTime int    `json:"create_time"`
+	Addressee  string `json:"addressee"`
+	Telephone  string `json:"telephone"`
+	Address    string `json:"address"`
 }
 
 type OrderList struct {
 	BookID     int `json:"id"`
 	Amount     int `json:"amount"`
 	TotalPrice int `json:"total_price"`
+}
+
+type SubmitOrder struct {
+	AddressID int         `json:"address_id"`
+	OrderData []OrderList `json:"order_data"`
 }
 
 type OrderDetails struct {

@@ -24,30 +24,6 @@ func AddUser(c *gin.Context) {
 	response.Success(c)
 }
 
-// UpdatePassword 更新用户密码
-//func UpdatePassword(c *gin.Context) {
-//	var request loginRequest
-//	if err := c.ShouldBindJSON(&request); err != nil {
-//		response.Error(c, "ShouldBindJSON："+err.Error())
-//		return
-//	}
-//	if request.Username == "" {
-//		response.BadRequest(c, "`username` is required")
-//		return
-//	}
-//	if request.Password == "" {
-//		response.BadRequest(c, "`password` is required")
-//		return
-//	}
-//
-//	err := user.UpdateUserPassword(request.Username, request.Password)
-//	if err != nil {
-//		response.Error(c, err.Error())
-//		return
-//	}
-//	response.Success(c)
-//}
-
 func DeleteUser(c *gin.Context) {
 	uuid := c.Params.ByName("uuid")
 	if uuid == "" {
@@ -63,6 +39,7 @@ func DeleteUser(c *gin.Context) {
 	response.Success(c)
 }
 
+// @Route /user/getAllUser [GET]
 func GetAllUser(c *gin.Context) {
 	page, _ := strconv.Atoi(c.DefaultQuery("page", "1"))
 	pageSize, _ := strconv.Atoi(c.DefaultQuery("pagesize", "10"))
@@ -87,7 +64,9 @@ func GetAllUser(c *gin.Context) {
 	}
 }
 
-func GetOneUser(c *gin.Context) {
+// GetUser 获取用户信息
+// @Route /getUser/:uuid/ [GET]
+func GetUser(c *gin.Context) {
 	uuid := c.Params.ByName("uuid")
 	res, err := user.GetUserForID(uuid)
 	if err != nil {
