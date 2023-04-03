@@ -11,5 +11,10 @@
     "addr": "",
     "password": "",
     "database": 0
-  }
+  },
+  "line_bot": {
+      "channel_secret": "",
+      "channel_access_token": "",
+      "group_id": ""
+    }
 }

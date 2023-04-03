@@ -35,6 +35,8 @@ func GetUserAllAddress(c *gin.Context) {
 	response.Data(c, result)
 }
 
+// GetUserAddress 获取用户地址信息
+// @Route /user/get_user_address[GET]
 func GetUserAddress(c *gin.Context) {
 	uuid := c.GetHeader("uuid")
 	AddressId := c.Query("address_id")

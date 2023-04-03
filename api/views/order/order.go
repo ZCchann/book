@@ -2,6 +2,7 @@ package order
 
 import (
 	"book/initalize/database/mysql/order"
+	"book/pkg/message/line"
 	"book/pkg/response"
 	"fmt"
 	"github.com/gin-gonic/gin"
@@ -36,6 +37,8 @@ func CreateOrder(c *gin.Context) {
 		return
 	}
 	response.Success(c)
+
+	line.SendMessage(fmt.Sprintf("用户提交一笔新订单 请注意查看 订单ID: %s", orderNumber))
 
 }
 

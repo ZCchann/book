@@ -11,6 +11,7 @@ require (
 	github.com/google/uuid v1.3.0 // indirect
 	github.com/klauspost/cpuid/v2 v2.2.4 // indirect
 	github.com/leodido/go-urn v1.2.2 // indirect
+	github.com/line/line-bot-sdk-go/v7 v7.20.0 // indirect
 	github.com/modern-go/concurrent v0.0.0-20180306012644-bacd9c7ef1dd // indirect
 	github.com/pelletier/go-toml/v2 v2.0.7 // indirect
 	github.com/tealeg/xlsx v1.0.5 // indirect

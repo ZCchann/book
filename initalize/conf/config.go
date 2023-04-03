@@ -11,9 +11,10 @@ import (
 
 type (
 	conf struct {
-		Debug bool        `json:"debug"            desc:"是否开启Debug模式"`
-		Mysql mysqlConfig `json:"mysql"            desc:"mysql配置"`
-		Redis redisConfig `json:"redis"            desc:"redis"`
+		Debug   bool        `json:"debug"            desc:"是否开启Debug模式"`
+		Mysql   mysqlConfig `json:"mysql"            desc:"mysql配置"`
+		Redis   redisConfig `json:"redis"            desc:"redis"`
+		LineBot lineBot     `json:"line_bot"`
 	}
 	mysqlConfig struct {
 		Username string `json:"username"`
@@ -26,6 +27,11 @@ type (
 		Addr     string `json:"addr"`
 		Password string `json:"password"`
 		Database int    `json:"database"`
+	}
+	lineBot struct {
+		ChannelSecret      string `json:"channel_secret"       desc:"频道secret token" `
+		ChannelAccessToken string `json:"channel_access_token" desc:"access token"`
+		GroupID            string `json:"group_id"`
 	}
 )
 

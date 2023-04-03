@@ -6,6 +6,7 @@ type OrderForm struct {
 	Addressee  string `json:"addressee"`
 	Telephone  string `json:"telephone"`
 	Address    string `json:"address"`
+	AddressID  int    `json:"address_id"`
 }
 
 type OrderList struct {

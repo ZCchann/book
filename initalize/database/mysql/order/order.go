@@ -99,7 +99,7 @@ func AddOrderList(orderList []OrderList, orderNumber string) (err []string) {
 
 // GetOrderList 获取订单信息
 func GetOrderList(uuid string) (result []OrderForm, err error) {
-	rows, err := mysql.Mysql().DB.Query("SELECT address.addressee, address.telephone, address.address, orderform.number, orderform.create_time FROM orderform, address WHERE orderform.address_id = address.address_id  AND orderform.uuid = ?;", uuid)
+	rows, err := mysql.Mysql().DB.Query("SELECT address.addressee, address.telephone, address.address, orderform.number, orderform.create_time,orderform.address_id FROM orderform, address WHERE orderform.address_id = address.address_id  AND orderform.uuid = ?;", uuid)
 	if err != nil {
 		log.Println("1 ", err)
 		return
@@ -107,7 +107,7 @@ func GetOrderList(uuid string) (result []OrderForm, err error) {
 
 	for rows.Next() {
 		var f OrderForm
-		err = rows.Scan(&f.Addressee, &f.Telephone, &f.Address, &f.Number, &f.CreateTime)
+		err = rows.Scan(&f.Addressee, &f.Telephone, &f.Address, &f.Number, &f.CreateTime, &f.AddressID)
 		if err != nil {
 			log.Println(err)
 			return nil, err
