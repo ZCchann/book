@@ -1,6 +1,7 @@
 package user
 
 import (
+	"book/api/authority"
 	"book/api/user/view"
 	"github.com/gin-gonic/gin"
 )
@@ -15,6 +16,7 @@ func RegisterRouter(r *gin.Engine) {
 		group.GET("/search/", view.SearchUserData)
 		group.GET("/get_user_all_address", view.GetUserAllAddress)
 		group.GET("/get_user_address", view.GetUserAddress)
+		group.GET("/get_route", authority.GetRoute)
 		group.POST("/addUser", view.AddUser)
 		group.POST("/updateUser", view.UpdateUser)
 		group.POST("/add_user_address", view.AddUserAddress)

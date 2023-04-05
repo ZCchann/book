@@ -23,6 +23,7 @@ func main() {
 
 	log.Println("初始化数据库")
 	database.InitMysql()
+	database.InitRedis()
 
 	log.Println("初始化路由")
 	r := gin.Default()

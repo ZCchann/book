@@ -5,6 +5,7 @@ import (
 	"book/pkg/response"
 	"github.com/gin-gonic/gin"
 	"log"
+	"net/http"
 	"strconv"
 )
 
@@ -70,7 +71,7 @@ func GetUser(c *gin.Context) {
 	uuid := c.Params.ByName("uuid")
 	res, err := user.GetUserForID(uuid)
 	if err != nil {
-		response.BadRequest(c, err.Error())
+		c.JSON(http.StatusUnauthorized, "Please provide valid login details")
 		log.Println(err.Error())
 		return
 	}

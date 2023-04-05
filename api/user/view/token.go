@@ -1,6 +1,7 @@
 package view
 
 import (
+	"book/api/user/internal/token"
 	"book/initalize/database/mysql/user"
 	"github.com/gin-gonic/gin"
 	"net/http"
@@ -23,11 +24,11 @@ func Login(c *gin.Context) {
 		return
 	}
 
-	//t, err := token.CreateToken(u.Username)
-	//if err != nil {
-	//	c.JSON(http.StatusInternalServerError, err.Error())
-	//	return
-	//}
+	t, err := token.CreateToken(u.Username)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, err.Error())
+		return
+	}
 	uuid := u.UUID
-	c.JSON(http.StatusOK, map[string]string{"jwt": "token123456789", "uuid": uuid}) //test
+	c.JSON(http.StatusOK, map[string]string{"jwt": t, "uuid": uuid}) //test
 }
