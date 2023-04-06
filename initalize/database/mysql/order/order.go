@@ -9,14 +9,14 @@ import (
 )
 
 //新建订单
-func CreateOrder(uuid string, addressID int) (number string, err error) {
+func CreateOrder(uuid, name, telephone, address string) (number string, err error) {
 	tx, err := mysql.Mysql().DB.Begin()
 	if err != nil {
 		log.Println("tx fail")
 	}
 
 	// 准备sql语句
-	stmt, err := tx.Prepare("INSERT INTO orderform (`uuid`,`create_time`,`address_id`) VALUE (?,?,?)")
+	stmt, err := tx.Prepare("INSERT INTO orderform (`uuid`,`create_time`,`addressee`,`telephone`,`address`) VALUE (?,?,?,?,?)")
 	if err != nil {
 		log.Println("prepare fail")
 		return "", err
@@ -26,7 +26,7 @@ func CreateOrder(uuid string, addressID int) (number string, err error) {
 	TimeStamp := time.Now().Unix()
 
 	// 传参到sql中执行
-	_, err = stmt.Exec(uuid, TimeStamp, addressID)
+	_, err = stmt.Exec(uuid, TimeStamp, name, telephone, address)
 	if err != nil {
 		log.Println("exec fail")
 		return "", err
@@ -68,15 +68,16 @@ func AddOrderList(orderList []OrderList, orderNumber string) (err []string) {
 		bookID := orderList[i].BookID
 		amount := orderList[i].Amount
 		totalPrice := orderList[i].TotalPrice
+		timestamp := time.Now().Unix()
 		// 准备sql语句
-		stmt, err := tx.Prepare("INSERT INTO orderlist (`number`,`bookid`,`amount`,`total_price`) VALUE (?,?,?,?)")
+		stmt, err := tx.Prepare("INSERT INTO orderlist (`number`,`bookid`,`amount`,`total_price`,`create_time`) VALUE (?,?,?,?,?)")
 		if err != nil {
 			log.Println("prepare fail")
 			errList = append(errList, fmt.Sprintf("bookID %s error: %s"), strconv.Itoa(bookID), err.Error())
 			continue
 		}
 		// 传参到sql中执行
-		_, err = stmt.Exec(orderNumber, bookID, amount, totalPrice)
+		_, err = stmt.Exec(orderNumber, bookID, amount, totalPrice, timestamp)
 		if err != nil {
 			log.Println("exec fail")
 			errList = append(errList, fmt.Sprintf("bookID %s error: %s"), strconv.Itoa(bookID), err.Error())
@@ -99,7 +100,7 @@ func AddOrderList(orderList []OrderList, orderNumber string) (err []string) {
 
 // GetOrderList 获取订单信息
 func GetOrderList(uuid string) (result []OrderForm, err error) {
-	rows, err := mysql.Mysql().DB.Query("SELECT address.addressee, address.telephone, address.address, orderform.number, orderform.create_time,orderform.address_id FROM orderform, address WHERE orderform.address_id = address.address_id  AND orderform.uuid = ?;", uuid)
+	rows, err := mysql.Mysql().DB.Query("SELECT number,addressee,telephone,address,create_time from orderform where  uuid = ?;", uuid)
 	if err != nil {
 		log.Println("1 ", err)
 		return
@@ -107,7 +108,7 @@ func GetOrderList(uuid string) (result []OrderForm, err error) {
 
 	for rows.Next() {
 		var f OrderForm
-		err = rows.Scan(&f.Addressee, &f.Telephone, &f.Address, &f.Number, &f.CreateTime, &f.AddressID)
+		err = rows.Scan(&f.Number, &f.Addressee, &f.Telephone, &f.Address, &f.CreateTime)
 		if err != nil {
 			log.Println(err)
 			return nil, err

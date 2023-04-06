@@ -16,8 +16,10 @@ type OrderList struct {
 }
 
 type SubmitOrder struct {
-	AddressID int         `json:"address_id"`
 	OrderData []OrderList `json:"order_data"`
+	Addressee string      `json:"addressee"`
+	Telephone string      `json:"telephone"`
+	Address   string      `json:"address"`
 }
 
 type OrderDetails struct {

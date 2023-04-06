@@ -2,6 +2,7 @@ package book
 
 import (
 	"book/initalize/database/mysql"
+	"database/sql"
 	"fmt"
 	"log"
 )
@@ -126,12 +127,30 @@ func EditBook(data BookData) (err error) {
 	return nil
 }
 
-func SearchBook(title string) (result []BookData, err error) {
-	rows, err := mysql.Mysql().DB.Query(fmt.Sprintf("SELECT * from bookdata where title REGEXP '%s';", title))
-	if err != nil {
-		log.Println(err)
-		return result, err
+func SearchBook(title, startTime, endTime string) (result []BookData, err error) {
+	var rows *sql.Rows
+	if startTime != "" && title != "" {
+		rows, err = mysql.Mysql().DB.Query(fmt.Sprintf("SELECT * FROM bookdata WHERE publicationDate BETWEEN %s and %s AND title REGEXP '%s';", startTime, endTime, title))
+		if err != nil {
+			log.Println(err)
+			return result, err
+		}
 	}
+	if startTime == "" && title != "" {
+		rows, err = mysql.Mysql().DB.Query(fmt.Sprintf("SELECT * from bookdata where title REGEXP '%s';", title))
+		if err != nil {
+			log.Println(err)
+			return result, err
+		}
+	}
+	if startTime != "" && title == "" {
+		rows, err = mysql.Mysql().DB.Query(fmt.Sprintf("SELECT * FROM bookdata WHERE publicationDate BETWEEN %s and %s;", startTime, endTime))
+		if err != nil {
+			log.Println(err)
+			return result, err
+		}
+	}
+
 	rows.Scan()
 	for rows.Next() {
 		var f BookData
