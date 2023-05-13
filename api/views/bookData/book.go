@@ -97,12 +97,14 @@ func AddBookData(c *gin.Context) {
 }
 
 // SearchBookData
-// @Router /book/search/?title=bookTitle [GET]
+// @Router /book/search/?title=bookTitle&start_time=timestamp&end_time=timestamp [GET]
 func SearchBookData(c *gin.Context) {
 	title := c.Query("title")
 	page, _ := strconv.Atoi(c.DefaultQuery("page", "1"))
 	pageSize, _ := strconv.Atoi(c.DefaultQuery("pagesize", "10"))
-	res, err := book.SearchBook(title)
+	startTime := c.DefaultQuery("start_time", "")
+	endTime := c.DefaultQuery("end_time", "")
+	res, err := book.SearchBook(title, startTime, endTime)
 	if err != nil {
 		response.BadRequest(c, err.Error())
 		log.Println(err.Error())

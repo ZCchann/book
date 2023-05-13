@@ -19,7 +19,7 @@ func CreateOrder(c *gin.Context) {
 	}
 	uuid := c.GetHeader("uuid")
 
-	orderNumber, err := order.CreateOrder(uuid, request.AddressID)
+	orderNumber, err := order.CreateOrder(uuid, request.Addressee, request.Telephone, request.Address)
 	if err != nil {
 		response.BadRequest(c, err.Error())
 		log.Println(err.Error())
