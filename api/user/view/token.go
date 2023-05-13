@@ -3,6 +3,7 @@ package view
 import (
 	"book/api/user/internal/token"
 	"book/initalize/database/mysql/user"
+	"book/pkg/grf/jwt"
 	"github.com/gin-gonic/gin"
 	"net/http"
 )
@@ -31,4 +32,14 @@ func Login(c *gin.Context) {
 	}
 	uuid := u.UUID
 	c.JSON(http.StatusOK, map[string]string{"jwt": t, "uuid": uuid}) //test
+}
+
+func Logout(c *gin.Context) {
+	claims := c.MustGet("claims").(*jwt.CustomClaims)
+	err := token.DelToken(claims.Id)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, err)
+		return
+	}
+	c.JSON(http.StatusOK, "success")
 }

@@ -7,11 +7,12 @@ import (
 )
 
 type User struct {
-	Id       string `json:"id"`
-	Username string `json:"username"`
-	Password string `json:"password"`
-	Email    string `json:"email"`
-	UUID     string `json:"uuid"`
+	Id          string `json:"id"`
+	Username    string `json:"username"`
+	Password    string `json:"password"`
+	Email       string `json:"email"`
+	UUID        string `json:"uuid"`
+	AuthorityID int    `json:"authorityid"`
 }
 
 //GetUser 通过用户名获取用户信息
@@ -39,14 +40,14 @@ func GetUserForID(uuid string) (data User, err error) {
 
 //GetAllUser 获取所有用户的用户名
 func GetAllUser() (result []User, err error) {
-	rows, err := mysql.Mysql().DB.Query("SELECT id,username,email,uuid FROM user")
+	rows, err := mysql.Mysql().DB.Query("SELECT id,username,email,uuid ,authorityID FROM user")
 	if err != nil {
 		log.Println(err)
 		return result, err
 	}
 	for rows.Next() {
 		var f User
-		err = rows.Scan(&f.Id, &f.Username, &f.Email, &f.UUID)
+		err = rows.Scan(&f.Id, &f.Username, &f.Email, &f.UUID, &f.AuthorityID)
 		if err != nil {
 			log.Println(err)
 			return nil, err
@@ -58,21 +59,21 @@ func GetAllUser() (result []User, err error) {
 }
 
 //AddUser 新增用户
-func AddUser(UserName, Password, Email string) error {
+func AddUser(UserName, Password, Email string, authorityID int) error {
 	tx, err := mysql.Mysql().DB.Begin()
 	if err != nil {
 		log.Println("tx fail")
 	}
 
 	// 准备sql语句
-	stmt, err := tx.Prepare("INSERT INTO user (`username`,`password`,`email`,`uuid`) VALUE (?,?,?,replace(uuid(),\"-\",\"\"))")
+	stmt, err := tx.Prepare("INSERT INTO user (`username`,`password`,`email`,`uuid`,`authorityID`) VALUE (?,?,?,replace(uuid(),\"-\",\"\"),?)")
 	if err != nil {
 		log.Println("prepare fail")
 		return err
 	}
 
 	// 传参到sql中执行
-	_, err = stmt.Exec(UserName, Password, Email)
+	_, err = stmt.Exec(UserName, Password, Email, authorityID)
 	if err != nil {
 		log.Println("exec fail")
 		return err
@@ -115,21 +116,21 @@ func DelUser(UUID string) error {
 }
 
 //UpdateUserPassword 更新用户密码
-func UpdateUserPassword(uuid, Email, Password string) error {
+func UpdateUserPassword(uuid, Email, Password string, authorityID int) error {
 	tx, err := mysql.Mysql().DB.Begin()
 	if err != nil {
 		log.Println("tx fail")
 	}
 
 	// 准备sql语句
-	stmt, err := tx.Prepare("UPDATE user SET password = ?, email= ? WHERE uuid = ?")
+	stmt, err := tx.Prepare("UPDATE user SET password = ?, email= ? ,authorityID= ? WHERE uuid = ?")
 	if err != nil {
 		log.Println("prepare fail")
 		return err
 	}
 
 	// 传参到sql中执行
-	_, err = stmt.Exec(Password, Email, uuid)
+	_, err = stmt.Exec(Password, Email, authorityID, uuid)
 	if err != nil {
 		log.Println("exec fail")
 		return err
@@ -163,7 +164,7 @@ func SearchUser(username string) (result []User, err error) {
 	return result, err
 }
 
-func UpdateUserEmail(uuid, email string) (err error) {
+func UpdateUserEmail(uuid, email string, authorityID int) (err error) {
 	tx, err := mysql.Mysql().DB.Begin()
 	if err != nil {
 		log.Println("tx fail")
@@ -171,14 +172,14 @@ func UpdateUserEmail(uuid, email string) (err error) {
 	}
 
 	// 准备sql语句
-	stmt, err := tx.Prepare("UPDATE user SET email = ? WHERE uuid = ?")
+	stmt, err := tx.Prepare("UPDATE user SET email = ? ,authorityID = ? WHERE uuid = ?")
 	if err != nil {
 		log.Println("prepare fail")
 		return err
 	}
 
 	// 传参到sql中执行
-	_, err = stmt.Exec(email, uuid)
+	_, err = stmt.Exec(email, authorityID, uuid)
 	if err != nil {
 		log.Println("exec fail")
 		return err

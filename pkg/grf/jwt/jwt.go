@@ -43,7 +43,7 @@ func (j *internalJwt) CreateToken(claims CustomClaims) (string, error) {
 	if claims.Id == "" {
 		claims.Id = uuid.New().String()
 	}
-	redis.Redis().Set(context.Background(), "jwt:"+claims.Id, time.Now().String(), 7*24*time.Hour)
+	redis.Redis().Set(context.Background(), "jwt:"+claims.Id, time.Now().String(), 3*time.Hour)
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
 	return token.SignedString(j.SigningKey)
 }

@@ -16,7 +16,7 @@ func AddUser(c *gin.Context) {
 		response.Error(c, "ShouldBindJSON："+err.Error())
 		return
 	}
-	err := user.AddUser(request.Username, request.Password, request.Email)
+	err := user.AddUser(request.Username, request.Password, request.Email, request.AuthorityID)
 	if err != nil {
 		response.BadRequest(c, err.Error())
 		log.Println(err.Error())
@@ -116,14 +116,14 @@ func UpdateUser(c *gin.Context) {
 	}
 
 	if request.Password != "" {
-		err := user.UpdateUserPassword(request.UUID, request.Email, request.Password)
+		err := user.UpdateUserPassword(request.UUID, request.Email, request.Password, request.AuthorityID)
 		if err != nil {
 			response.Error(c, err.Error())
 			return
 		}
 		response.Success(c)
 	} else {
-		err := user.UpdateUserEmail(request.UUID, request.Email)
+		err := user.UpdateUserEmail(request.UUID, request.Email, request.AuthorityID)
 		if err != nil {
 			log.Println(err)
 			response.Error(c, err.Error())

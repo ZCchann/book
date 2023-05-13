@@ -13,7 +13,7 @@ func CreateToken(username string) (string, error) {
 
 	atClaims := jwt.CustomClaims{}
 	atClaims.Username = username
-	atClaims.ExpiresAt = time.Now().Add(12 * time.Hour).Unix()
+	atClaims.ExpiresAt = time.Now().Add(3 * time.Hour).Unix()
 
 	token, err := jwt.JWT().CreateToken(atClaims)
 	if err != nil {
