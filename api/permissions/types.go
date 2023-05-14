@@ -19,6 +19,16 @@ type Routers struct {
 	Children []Router `json:"children"`
 }
 
+type Permission struct {
+	Name  string `json:"name"`
+	State bool   `json:"state"`
+}
+type EditPermissions struct {
+	ID          int          `json:"id"`
+	RuleName    string       `json:"rule_name"`
+	Permissions []Permission `json:"permissions"`
+}
+
 func AllData() (data Router) {
 	data.Name = "AllData"
 	data.Path = "/alldata"
@@ -32,6 +42,13 @@ func User() (data Router) {
 	data.Path = "/user"
 	data.Meta.Title = "用户管理"
 	data.Component = "admin/user/UserView.vue"
+	return data
+}
+func permissions() (data Router) {
+	data.Name = "Permissions"
+	data.Path = "/permissions"
+	data.Meta.Title = "权限管理"
+	data.Component = "admin/permissions/permissions.vue"
 
 	return data
 }
@@ -43,6 +60,7 @@ func AdminMenu() (data Routers) {
 	data.Meta.IsTrue = 1
 	data.Children = append(data.Children, AllData())
 	data.Children = append(data.Children, User())
+	data.Children = append(data.Children, permissions())
 	return data
 }
 

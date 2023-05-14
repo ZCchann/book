@@ -66,3 +66,26 @@ func GetPermissionsByID(ID string) (result Authority, err error) {
 	}
 	return result, err
 }
+
+func UpdatePermissionsByID(data UpdatePermission) (err error) {
+	tx, err := mysql.Mysql().DB.Begin()
+	if err != nil {
+		log.Println("tx fail")
+		return err
+	}
+	//for _,i:= range data.Permissions {
+	//
+	//}
+	stmt, err := tx.Prepare("UPDATE authority SET admin=?,order=?,permission=?,user=? WHERE id=?")
+	if err != nil {
+		log.Println("Prepare fail ", err)
+		return err
+	}
+	_, err = stmt.Exec(data.ID)
+	if err != nil {
+		log.Println("exec fail ", err)
+		return err
+	}
+	tx.Commit()
+	return nil
+}

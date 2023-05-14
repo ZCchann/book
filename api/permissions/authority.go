@@ -6,11 +6,13 @@ import (
 	"fmt"
 	"github.com/gin-gonic/gin"
 	"log"
+	"reflect"
 )
 
 func GetRoute(c *gin.Context) {
 	var result []Routers
 	result = append(result, AdminMenu())
+	result = append(result, OrderMenu())
 	result = append(result, OrderMenu())
 	response.Data(c, result)
 
@@ -34,6 +36,7 @@ func GetAllPermissionsIDName(c *gin.Context) {
 		log.Println(err)
 		return
 	}
+	log.Println(result)
 	response.Data(c, result)
 }
 
@@ -44,5 +47,31 @@ func GetPermissionsByID(c *gin.Context) {
 		log.Println(err)
 		return
 	}
-	response.Data(c, result)
+
+	d := new(EditPermissions)
+	d.ID = result.ID
+	d.RuleName = result.RuleName
+
+	// 遍历一下mysql返回值 重组数据
+	v := reflect.ValueOf(result)
+	for i := 0; i < v.NumField(); i++ {
+		status := v.Field(i).Interface()
+		name := v.Type().Field(i).Name
+		if name == "ID" || name == "RuleName" {
+			// 跳过这两个ID名称
+			continue
+		}
+		s := false //临时变量 用于接收遍历结构体的布尔值
+		var value Permission
+
+		value.Name = name
+		if boolValue, ok := status.(bool); ok {
+			s = boolValue
+		}
+		value.State = s
+		d.Permissions = append(d.Permissions, value)
+
+	}
+
+	response.Data(c, d)
 }
