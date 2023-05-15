@@ -1,9 +1,16 @@
 package authority
 
-import (
-	"book/api/permissions"
-	"database/sql"
-)
+import "database/sql"
+
+type Permission struct {
+	Name  string `json:"name"`
+	State bool   `json:"state"`
+}
+type EditPermissions struct {
+	ID          int          `json:"id"`
+	RuleName    string       `json:"rule_name"`
+	Permissions []Permission `json:"permissions"`
+}
 
 type Auth struct {
 	Admin    int    `json:"admin"`
@@ -25,13 +32,7 @@ type Authority struct {
 	ID         int    `json:"id"`
 	Data       bool   `json:"data"`
 	Order      bool   `json:"order"`
-	Permission bool   `json:"permission"`
+	Permission bool   `json:"Permission"`
 	User       bool   `json:"user"`
 	RuleName   string `json:"rulename"`
-}
-
-type UpdatePermission struct {
-	ID          int                      `json:"id"`
-	Permissions []permissions.Permission `json:"permissions"`
-	RuleName    string                   `json:"rule_name"`
 }

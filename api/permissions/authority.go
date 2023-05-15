@@ -48,7 +48,7 @@ func GetPermissionsByID(c *gin.Context) {
 		return
 	}
 
-	d := new(EditPermissions)
+	d := new(authority.EditPermissions)
 	d.ID = result.ID
 	d.RuleName = result.RuleName
 
@@ -62,7 +62,7 @@ func GetPermissionsByID(c *gin.Context) {
 			continue
 		}
 		s := false //临时变量 用于接收遍历结构体的布尔值
-		var value Permission
+		var value authority.Permission
 
 		value.Name = name
 		if boolValue, ok := status.(bool); ok {
@@ -74,4 +74,18 @@ func GetPermissionsByID(c *gin.Context) {
 	}
 
 	response.Data(c, d)
+}
+
+func UpdatePermissionsByID(c *gin.Context) {
+	var request authority.EditPermissions
+	if err := c.ShouldBindJSON(&request); err != nil {
+		response.Error(c, "ShouldBindJSON："+err.Error())
+		return
+	}
+	err := authority.UpdatePermissionsByID(request)
+	if err != nil {
+		response.Error(c, err.Error())
+		return
+	}
+	response.Success(c)
 }
