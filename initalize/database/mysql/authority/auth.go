@@ -5,10 +5,10 @@ import (
 	"log"
 )
 
-func GetRule(UserName string) (result Auth, err error) {
-	err = mysql.Mysql().DB.QueryRow("SELECT admin, order, rulename FROM user JOIN permissions ON user.authorityID = id WHERE user.username = ?;", UserName).Scan(&result.Admin, &result.Order, &result.RuleName)
+// GetRuleForUUID 通过UUID 查询权限详情
+func GetRuleForUUID(uuid string) (result Authority, err error) {
+	err = mysql.Mysql().DB.QueryRow("SELECT authority.data_management, authority.order_management, authority.permission_management, authority.user_management FROM user JOIN authority ON user.authorityID = authority.id WHERE user.uuid = ?;", uuid).Scan(&result.DataManagement, &result.OrderManagement, &result.PermissionManagement, &result.UserManagement)
 	if err != nil {
-		log.Println(err)
 		return
 	}
 	return result, err
@@ -16,7 +16,6 @@ func GetRule(UserName string) (result Auth, err error) {
 
 // GetPermissionsGroup 所有权限细节信息
 func GetPermissionsGroup() (columns []Column, err error) {
-
 	rows, err := mysql.Mysql().DB.Query("SHOW COLUMNS FROM authority;")
 	if err != nil {
 		return nil, err
@@ -38,6 +37,7 @@ func GetPermissionsGroup() (columns []Column, err error) {
 	return columns, nil
 }
 
+// GetAllPermissionsIDName 返回所有的权限组ID、权限名称
 func GetAllPermissionsIDName() (result []EditPermissions, err error) {
 	rows, err := mysql.Mysql().DB.Query("select id,rulename from authority;")
 	if err != nil {
@@ -59,7 +59,7 @@ func GetAllPermissionsIDName() (result []EditPermissions, err error) {
 
 // GetPermissionsByID 通过ID获取权限详情
 func GetPermissionsByID(ID string) (result Authority, err error) {
-	err = mysql.Mysql().DB.QueryRow("select * from authority where id= ?", ID).Scan(&result.ID, &result.Data, &result.Order, &result.Permission, &result.User, &result.RuleName)
+	err = mysql.Mysql().DB.QueryRow("select * from authority where id= ?", ID).Scan(&result.ID, &result.DataManagement, &result.OrderManagement, &result.PermissionManagement, &result.UserManagement, &result.RuleName)
 	if err != nil {
 		log.Println(err)
 		return
@@ -79,13 +79,13 @@ func UpdatePermissionsByID(data EditPermissions) (err error) {
 	for _, i := range data.Permissions {
 		log.Println("name ", i.Name, " status ", i.State)
 		switch i.Name {
-		case "Data":
+		case "DataManagement":
 			DataManagement = i.State
-		case "Order":
+		case "OrderManagement":
 			OrderManagement = i.State
-		case "Permission":
+		case "PermissionManagement":
 			permissionManagement = i.State
-		case "User":
+		case "UserManagement":
 			userManagement = i.State
 		}
 	}

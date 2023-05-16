@@ -9,12 +9,15 @@ import (
 	"reflect"
 )
 
+// GetRoute 返回动态路由给前端
 func GetRoute(c *gin.Context) {
-	var result []Routers
-	result = append(result, AdminMenu())
-	result = append(result, OrderMenu())
-	result = append(result, OrderMenu())
-	response.Data(c, result)
+	uuid := c.Params.ByName("uuid")
+	res, err := PermissionFiltering(uuid)
+	if err != nil {
+		response.Error(c, err.Error())
+		return
+	}
+	response.Data(c, res)
 
 }
 
@@ -30,13 +33,14 @@ func GetPermissions(c *gin.Context) {
 	}
 }
 
+// GetAllPermissionsIDName 返回权限ID与权限组名称、权限详情信息
 func GetAllPermissionsIDName(c *gin.Context) {
 	result, err := authority.GetAllPermissionsIDName()
 	if err != nil {
 		log.Println(err)
+		response.Error(c, err.Error())
 		return
 	}
-	log.Println(result)
 	response.Data(c, result)
 }
 
@@ -45,6 +49,7 @@ func GetPermissionsByID(c *gin.Context) {
 	result, err := authority.GetPermissionsByID(permissionsID)
 	if err != nil {
 		log.Println(err)
+		response.Error(c, err.Error())
 		return
 	}
 
@@ -76,6 +81,7 @@ func GetPermissionsByID(c *gin.Context) {
 	response.Data(c, d)
 }
 
+//UpdatePermissionsByID 通过权限组ID来更改权限内容
 func UpdatePermissionsByID(c *gin.Context) {
 	var request authority.EditPermissions
 	if err := c.ShouldBindJSON(&request); err != nil {
@@ -84,6 +90,7 @@ func UpdatePermissionsByID(c *gin.Context) {
 	}
 	err := authority.UpdatePermissionsByID(request)
 	if err != nil {
+		log.Println(err)
 		response.Error(c, err.Error())
 		return
 	}

@@ -3,12 +3,13 @@ package user
 import (
 	"book/api/permissions"
 	"book/api/user/view"
+	"book/pkg/grf/middleware"
 	"github.com/gin-gonic/gin"
 )
 
 func RegisterRouter(r *gin.Engine) {
 	r.POST("/login", view.Login)
-	//r.Use(middleware.Jwt())
+	r.Use(middleware.Jwt())
 	r.POST("/logout", view.Logout)
 
 	group := r.Group("/user")
@@ -27,7 +28,7 @@ func RegisterRouter(r *gin.Engine) {
 	}
 	permission := r.Group("/permissions")
 	{
-		permission.GET("/get_route", permissions.GetRoute)
+		permission.GET("/get_route/:uuid/", permissions.GetRoute)
 		permission.GET("/get_permissions_id_name", permissions.GetAllPermissionsIDName)
 		permission.GET("/get_permissions_by_id", permissions.GetPermissionsByID)
 		permission.POST("/update_permissions_by_id", permissions.UpdatePermissionsByID)

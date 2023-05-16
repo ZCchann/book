@@ -12,12 +12,6 @@ type EditPermissions struct {
 	Permissions []Permission `json:"permissions"`
 }
 
-type Auth struct {
-	Admin    int    `json:"admin"`
-	Order    int    `json:"order"`
-	RuleName string `json:"rulename"`
-}
-
 type Column struct {
 	Name       string
 	Type       string
@@ -29,10 +23,10 @@ type Column struct {
 }
 
 type Authority struct {
-	ID         int    `json:"id"`
-	Data       bool   `json:"data"`
-	Order      bool   `json:"order"`
-	Permission bool   `json:"Permission"`
-	User       bool   `json:"user"`
-	RuleName   string `json:"rulename"`
+	ID                   int    `json:"id"`
+	DataManagement       bool   `json:"data_management"`
+	OrderManagement      bool   `json:"order_management"`
+	PermissionManagement bool   `json:"permission_management"`
+	UserManagement       bool   `json:"user_management"`
+	RuleName             string `json:"rulename"`
 }
