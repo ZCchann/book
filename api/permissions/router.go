@@ -81,7 +81,6 @@ func PermissionFiltering(uuid string) (routers []Routers, err error) {
 			s = boolValue
 		}
 
-		log.Println(ruleName, s)
 		if ruleName == "DataManagement" && s == true {
 			adminMenu.Children = append(adminMenu.Children, AllData())
 		} else if ruleName == "PermissionManagement" && s == true {

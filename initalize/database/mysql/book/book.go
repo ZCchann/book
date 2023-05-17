@@ -57,6 +57,7 @@ func AddBook(data BookData) error {
 	tx, err := mysql.Mysql().DB.Begin()
 	if err != nil {
 		log.Println("tx fail")
+		return err
 	}
 	// 准备sql语句
 	stmt, err := tx.Prepare("INSERT INTO bookdata (`isbn`,`title`,`price`,`press`,`Type`,`restriction`,`author`,`publicationDate`) VALUE (?,?,?,?,?,?,?,?)")
@@ -84,6 +85,7 @@ func DelBook(ID string) error {
 	tx, err := mysql.Mysql().DB.Begin()
 	if err != nil {
 		log.Println("tx fail")
+		return err
 	}
 
 	// 准备sql语句

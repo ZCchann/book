@@ -31,6 +31,8 @@ func RegisterRouter(r *gin.Engine) {
 		permission.GET("/get_route/:uuid/", permissions.GetRoute)
 		permission.GET("/get_permissions_id_name", permissions.GetAllPermissionsIDName)
 		permission.GET("/get_permissions_by_id", permissions.GetPermissionsByID)
+		permission.GET("/get_permissions_demo", permissions.GetPermissionDemo)
+		permission.POST("/add_permission", permissions.AddPermission)
 		permission.POST("/update_permissions_by_id", permissions.UpdatePermissionsByID)
 
 	}

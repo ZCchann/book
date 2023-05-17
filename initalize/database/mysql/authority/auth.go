@@ -14,41 +14,25 @@ func GetRuleForUUID(uuid string) (result Authority, err error) {
 	return result, err
 }
 
-// GetPermissionsGroup 所有权限细节信息
-func GetPermissionsGroup() (columns []Column, err error) {
-	rows, err := mysql.Mysql().DB.Query("SHOW COLUMNS FROM authority;")
+// GetPermissionsFirst 所有数据库第一条结果
+func GetPermissionsFirst() (result Authority, err error) {
+	err = mysql.Mysql().DB.QueryRow("select * from authority LIMIT 0,1;").Scan(&result.ID, &result.DataManagement, &result.OrderManagement, &result.PermissionManagement, &result.UserManagement, &result.RuleName)
 	if err != nil {
-		return nil, err
+		return
 	}
-	defer rows.Close()
-
-	for rows.Next() {
-		var column Column
-		if err := rows.Scan(&column.Name, &column.Type, &column.Null, &column.Key, &column.Default, &column.Extra); err != nil {
-			return nil, err
-		}
-		columns = append(columns, column)
-	}
-
-	if err := rows.Err(); err != nil {
-		return nil, err
-	}
-
-	return columns, nil
+	return result, err
 }
 
 // GetAllPermissionsIDName 返回所有的权限组ID、权限名称
 func GetAllPermissionsIDName() (result []EditPermissions, err error) {
 	rows, err := mysql.Mysql().DB.Query("select id,rulename from authority;")
 	if err != nil {
-		log.Println(err)
 		return
 	}
 	for rows.Next() {
 		var f EditPermissions
 		err = rows.Scan(&f.ID, &f.RuleName)
 		if err != nil {
-			log.Println(err)
 			return nil, err
 		}
 		result = append(result, f)
@@ -61,10 +45,51 @@ func GetAllPermissionsIDName() (result []EditPermissions, err error) {
 func GetPermissionsByID(ID string) (result Authority, err error) {
 	err = mysql.Mysql().DB.QueryRow("select * from authority where id= ?", ID).Scan(&result.ID, &result.DataManagement, &result.OrderManagement, &result.PermissionManagement, &result.UserManagement, &result.RuleName)
 	if err != nil {
-		log.Println(err)
 		return
 	}
 	return result, err
+}
+
+func AddPermission(data EditPermissions) (err error) {
+	tx, err := mysql.Mysql().DB.Begin()
+	if err != nil {
+		log.Println("tx fail")
+		return err
+	}
+	stmt, err := tx.Prepare("INSERT INTO authority (`data_management`,`order_management`,`permission_management`,`user_management`,`rulename`) VALUE (?,?,?,?,?);")
+	if err != nil {
+		log.Println("prepare fail")
+		return err
+	}
+	var DataManagement, OrderManagement, permissionManagement, userManagement bool
+
+	for _, i := range data.Permissions {
+		log.Println("name ", i.Name, " status ", i.State)
+		switch i.Name {
+		case "DataManagement":
+			DataManagement = i.State
+		case "OrderManagement":
+			OrderManagement = i.State
+		case "PermissionManagement":
+			permissionManagement = i.State
+		case "UserManagement":
+			userManagement = i.State
+		}
+	}
+
+	// 传参到sql中执行
+	_, err = stmt.Exec(DataManagement, OrderManagement, permissionManagement, userManagement, data.RuleName)
+	if err != nil {
+		log.Println("exec fail")
+		return err
+	}
+	// 提交
+	err = tx.Commit()
+	if err != nil {
+		log.Println("commit error ", err)
+		return err
+	}
+	return nil
 }
 
 // UpdatePermissionsByID 根据权限ID更改内容
