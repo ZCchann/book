@@ -34,6 +34,6 @@ func RegisterRouter(r *gin.Engine) {
 		permission.GET("/get_permissions_demo", permissions.GetPermissionDemo)
 		permission.POST("/add_permission", permissions.AddPermission)
 		permission.POST("/update_permissions_by_id", permissions.UpdatePermissionsByID)
-
+		permission.DELETE("/del_permissions_by_id", permissions.DeletePermissionsByID)
 	}
 }

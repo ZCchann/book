@@ -136,3 +136,23 @@ func GetOrderDetails(orderNumber string) (result []OrderDetails, err error) {
 	}
 	return result, err
 }
+
+// GetAllOrderList 获取所有订单信息
+func GetAllOrderList() (result []OrderForm, err error) {
+	rows, err := mysql.Mysql().DB.Query("SELECT number,addressee,telephone,address,create_time from orderform;")
+	if err != nil {
+		log.Println("1 ", err)
+		return
+	}
+
+	for rows.Next() {
+		var f OrderForm
+		err = rows.Scan(&f.Number, &f.Addressee, &f.Telephone, &f.Address, &f.CreateTime)
+		if err != nil {
+			log.Println(err)
+			return nil, err
+		}
+		result = append(result, f)
+	}
+	return result, err
+}

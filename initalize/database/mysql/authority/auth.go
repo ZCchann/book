@@ -50,6 +50,7 @@ func GetPermissionsByID(ID string) (result Authority, err error) {
 	return result, err
 }
 
+// AddPermission 添加权限组信息
 func AddPermission(data EditPermissions) (err error) {
 	tx, err := mysql.Mysql().DB.Begin()
 	if err != nil {
@@ -126,5 +127,34 @@ func UpdatePermissionsByID(data EditPermissions) (err error) {
 		return err
 	}
 	tx.Commit()
+	return nil
+}
+
+// DeletePermissionByID 通过权限组ID删除权限组
+func DeletePermissionByID(PermissionID int) (err error) {
+	tx, err := mysql.Mysql().DB.Begin()
+	if err != nil {
+		log.Println("tx fail")
+		return err
+	}
+
+	// 准备sql语句
+	stmt, err := tx.Prepare("DELETE FROM authority WHERE id = ?")
+	if err != nil {
+		log.Println("prepare fail")
+		return err
+	}
+
+	// 传参到sql中执行
+	_, err = stmt.Exec(PermissionID)
+	if err != nil {
+		log.Println("exec fail")
+		return err
+	}
+	// 提交
+	err = tx.Commit()
+	if err != nil {
+		log.Println("commit error ", err)
+	}
 	return nil
 }

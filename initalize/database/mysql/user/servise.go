@@ -87,6 +87,7 @@ func AddUser(UserName, Password, Email string, authorityID int) error {
 	return nil
 }
 
+// DelUser 删除用户
 func DelUser(UUID string) error {
 	tx, err := mysql.Mysql().DB.Begin()
 	if err != nil {
@@ -144,6 +145,7 @@ func UpdateUserPassword(uuid, Email, Password string, authorityID int) error {
 	return nil
 }
 
+// SearchUser 通过用户名搜索用户信息
 func SearchUser(username string) (result []User, err error) {
 	rows, err := mysql.Mysql().DB.Query(fmt.Sprintf("SELECT id,username,email from user where username REGEXP '%s';", username))
 	if err != nil {
@@ -164,6 +166,7 @@ func SearchUser(username string) (result []User, err error) {
 	return result, err
 }
 
+// UpdateUserEmail 更新用户信息
 func UpdateUserEmail(uuid, email string, authorityID int) (err error) {
 	tx, err := mysql.Mysql().DB.Begin()
 	if err != nil {
@@ -191,4 +194,24 @@ func UpdateUserEmail(uuid, email string, authorityID int) (err error) {
 		return err
 	}
 	return nil
+}
+
+// GetUserPermissionForID 通过权限ID查询用户
+func GetUserPermissionForID(PermissionID int) (result []User, err error) {
+	rows, err := mysql.Mysql().DB.Query(fmt.Sprintf("SELECT id, username, email, uuid, authorityID FROM user WHERE authorityID = %d", PermissionID))
+	if err != nil {
+		log.Println(err)
+		return result, err
+	}
+	for rows.Next() {
+		var f User
+		err = rows.Scan(&f.Id, &f.Username, &f.Email, &f.UUID, &f.AuthorityID)
+		if err != nil {
+			log.Println(err)
+			return nil, err
+		}
+		result = append(result, f)
+	}
+
+	return result, err
 }

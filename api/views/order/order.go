@@ -55,6 +55,18 @@ func GetOrder(c *gin.Context) {
 	response.Data(c, requests)
 }
 
+// GetAllOrder 获取uuid 所有的订单信息
+// @Route /order/get_all_order [GET]
+func GetAllOrder(c *gin.Context) {
+	requests, err := order.GetAllOrderList()
+	if err != nil {
+		response.BadRequest(c, err.Error())
+		log.Println(err.Error())
+		return
+	}
+	response.Data(c, requests)
+}
+
 func GetOrderDetails(c *gin.Context) {
 	orderNumber := c.Query("number")
 	requests, err := order.GetOrderDetails(orderNumber)

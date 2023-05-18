@@ -53,6 +53,14 @@ func orderList() (data Router) {
 	return data
 }
 
+func orderAllList() (data Router) {
+	data.Name = "AllOrderView"
+	data.Path = "/AllOrder"
+	data.Meta.Title = "所有订单管理"
+	data.Component = "order/allorder/AllOrderView.vue"
+	return data
+}
+
 func OrderMenu() (data Routers) {
 	data.Name = "orderMenu"
 	data.Path = "/order"
@@ -60,6 +68,7 @@ func OrderMenu() (data Routers) {
 	data.Meta.IsTrue = 1
 	data.Children = append(data.Children, newOrder())
 	data.Children = append(data.Children, orderList())
+	data.Children = append(data.Children, orderAllList())
 	return data
 }
 
