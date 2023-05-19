@@ -24,7 +24,7 @@ func GetAllBookData(c *gin.Context) {
 	total := len(res)                 //数据总页数
 
 	//分页
-	if page > 1 && ePage > total {
+	if page > 1 || ePage > total {
 		ret := res[sPage:total]
 		response.DataWtihPage(c, ret, total)
 	} else {

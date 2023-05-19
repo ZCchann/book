@@ -141,7 +141,7 @@ func GetOrderDetails(orderNumber string) (result []OrderDetails, err error) {
 func GetAllOrderList() (result []OrderForm, err error) {
 	rows, err := mysql.Mysql().DB.Query("SELECT number,addressee,telephone,address,create_time from orderform;")
 	if err != nil {
-		log.Println("1 ", err)
+		log.Println(err)
 		return
 	}
 

@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"github.com/gin-gonic/gin"
 	"log"
+	"strconv"
 )
 
 //CreateOrder 新建订单
@@ -46,25 +47,50 @@ func CreateOrder(c *gin.Context) {
 // @Route /order/get_order [GET]
 func GetOrder(c *gin.Context) {
 	uuid := c.GetHeader("uuid")
-	requests, err := order.GetOrderList(uuid)
+	page, _ := strconv.Atoi(c.DefaultQuery("page", "1"))
+	pageSize, _ := strconv.Atoi(c.DefaultQuery("pagesize", "10"))
+	res, err := order.GetOrderList(uuid)
 	if err != nil {
 		response.BadRequest(c, err.Error())
 		log.Println(err.Error())
 		return
 	}
-	response.Data(c, requests)
+	sPage := page*pageSize - pageSize //起始index
+	ePage := page * pageSize          //结束index
+	total := len(res)                 //数据总页数
+	//分页
+	if page > 1 || ePage > total {
+		ret := res[sPage:total]
+		response.DataWtihPage(c, ret, total)
+	} else {
+		ret := res[sPage:ePage]
+		response.DataWtihPage(c, ret, total)
+	}
 }
 
 // GetAllOrder 获取uuid 所有的订单信息
 // @Route /order/get_all_order [GET]
 func GetAllOrder(c *gin.Context) {
-	requests, err := order.GetAllOrderList()
+	page, _ := strconv.Atoi(c.DefaultQuery("page", "1"))
+	pageSize, _ := strconv.Atoi(c.DefaultQuery("pagesize", "10"))
+	res, err := order.GetAllOrderList()
 	if err != nil {
 		response.BadRequest(c, err.Error())
 		log.Println(err.Error())
 		return
 	}
-	response.Data(c, requests)
+	sPage := page*pageSize - pageSize //起始index
+	ePage := page * pageSize          //结束index
+	total := len(res)                 //数据总页数
+	//分页
+	if page > 1 || ePage > total {
+		ret := res[sPage:total]
+		response.DataWtihPage(c, ret, total)
+	} else {
+		ret := res[sPage:ePage]
+		response.DataWtihPage(c, ret, total)
+	}
+
 }
 
 func GetOrderDetails(c *gin.Context) {
