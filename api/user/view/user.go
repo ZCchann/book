@@ -107,7 +107,7 @@ func UpdateUser(c *gin.Context) {
 		response.Error(c, "ShouldBindJSON："+err.Error())
 		return
 	}
-
+	log.Println(request)
 	if request.Password != "" {
 		err := user.UpdateUserPassword(request.UUID, request.Email, request.Password, request.AuthorityID)
 		if err != nil {

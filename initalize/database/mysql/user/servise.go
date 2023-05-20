@@ -29,7 +29,7 @@ func GetUser(UserName string) (u User, err error) {
 
 //GetUserForID 通过ID获取用户信息 不含密码
 func GetUserForID(uuid string) (data User, err error) {
-	err = mysql.Mysql().DB.QueryRow("SELECT uuid,username,email FROM user WHERE uuid = ? ", uuid).Scan(&data.UUID, &data.Username, &data.Email)
+	err = mysql.Mysql().DB.QueryRow("SELECT uuid,username,email,authorityID FROM user WHERE uuid = ? ", uuid).Scan(&data.UUID, &data.Username, &data.Email, &data.AuthorityID)
 	if err != nil {
 		log.Println(err.Error())
 		return
