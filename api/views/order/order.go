@@ -10,6 +10,19 @@ import (
 	"strconv"
 )
 
+// getPageData 返回分页数据
+func getPageData(data []order.OrderForm, page int, pageSize int) []order.OrderForm {
+	start := (page - 1) * pageSize
+	end := page * pageSize
+	if start > len(data) {
+		return []order.OrderForm{}
+	}
+	if end > len(data) {
+		end = len(data)
+	}
+	return data[start:end]
+}
+
 //CreateOrder 新建订单
 // @Route /order/createOrder
 func CreateOrder(c *gin.Context) {
@@ -55,17 +68,9 @@ func GetOrder(c *gin.Context) {
 		log.Println(err.Error())
 		return
 	}
-	sPage := page*pageSize - pageSize //起始index
-	ePage := page * pageSize          //结束index
-	total := len(res)                 //数据总页数
-	//分页
-	if page > 1 || ePage > total {
-		ret := res[sPage:total]
-		response.DataWtihPage(c, ret, total)
-	} else {
-		ret := res[sPage:ePage]
-		response.DataWtihPage(c, ret, total)
-	}
+	total := len(res) //数据总页数
+	ret := getPageData(res, page, pageSize)
+	response.DataWtihPage(c, ret, total)
 }
 
 // GetAllOrder 获取uuid 所有的订单信息
@@ -79,17 +84,9 @@ func GetAllOrder(c *gin.Context) {
 		log.Println(err.Error())
 		return
 	}
-	sPage := page*pageSize - pageSize //起始index
-	ePage := page * pageSize          //结束index
-	total := len(res)                 //数据总页数
-	//分页
-	if page > 1 || ePage > total {
-		ret := res[sPage:total]
-		response.DataWtihPage(c, ret, total)
-	} else {
-		ret := res[sPage:ePage]
-		response.DataWtihPage(c, ret, total)
-	}
+	total := len(res) //数据总页数
+	ret := getPageData(res, page, pageSize)
+	response.DataWtihPage(c, ret, total)
 
 }
 
@@ -102,4 +99,16 @@ func GetOrderDetails(c *gin.Context) {
 		return
 	}
 	response.Data(c, requests)
+}
+
+// ExportOrderData 返回订单详情
+func ExportOrderData(c *gin.Context) {
+	orderNumberList := c.Query("order_number_list")
+	res, err := order.ExportOrderData(orderNumberList)
+	if err != nil {
+		response.BadRequest(c, err.Error())
+		log.Println(err.Error())
+		return
+	}
+	response.Data(c, res)
 }

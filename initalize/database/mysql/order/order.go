@@ -156,3 +156,22 @@ func GetAllOrderList() (result []OrderForm, err error) {
 	}
 	return result, err
 }
+
+// ExportOrderData 导出订单信息
+func ExportOrderData(orderListID string) (result []ExportBookData, err error) {
+	rows, err := mysql.Mysql().DB.Query(fmt.Sprintf("SELECT SUM(orderlist.amount) as total_amount, bookdata.title ,bookdata.isbn,bookdata.press,bookdata.type, bookdata.restriction FROM orderlist orderlist INNER JOIN bookdata bookdata ON orderlist.bookid = bookdata.id WHERE orderlist.number IN (%s) GROUP BY orderlist.bookid, bookdata.id", orderListID))
+	if err != nil {
+		log.Println(err)
+		return result, err
+	}
+	for rows.Next() {
+		var f ExportBookData
+		err = rows.Scan(&f.TotalAmount, &f.Title, &f.ISBN, &f.Press, &f.Type, &f.Restriction)
+		if err != nil {
+			return nil, err
+		}
+		result = append(result, f)
+	}
+
+	return result, err
+}

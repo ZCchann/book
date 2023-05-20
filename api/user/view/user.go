@@ -9,6 +9,19 @@ import (
 	"strconv"
 )
 
+// getPageData 返回分页数据
+func getPageData(data []user.User, page int, pageSize int) []user.User {
+	start := (page - 1) * pageSize
+	end := page * pageSize
+	if start > len(data) {
+		return []user.User{}
+	}
+	if end > len(data) {
+		end = len(data)
+	}
+	return data[start:end]
+}
+
 //AddUser 添加用户
 func AddUser(c *gin.Context) {
 	var request user.User
@@ -49,20 +62,10 @@ func GetAllUser(c *gin.Context) {
 		response.Error(c, "ShouldBindJSON："+err.Error())
 		return
 	}
-	sPage := page*pageSize - pageSize //起始index
-	ePage := page * pageSize          //结束index
-	total := len(res)                 //数据总页数
-
 	//分页
-	if len(res) < pageSize-1 {
-		response.DataWtihPage(c, res, total)
-	} else if ePage > total {
-		ret := res[sPage:total]
-		response.DataWtihPage(c, ret, total)
-	} else {
-		ret := res[sPage : ePage-1]
-		response.DataWtihPage(c, ret, total)
-	}
+	total := len(res) //数据总页数
+	ret := getPageData(res, page, pageSize)
+	response.DataWtihPage(c, ret, total)
 }
 
 // GetUser 获取用户信息
@@ -90,20 +93,10 @@ func SearchUserData(c *gin.Context) {
 		return
 	}
 
-	sPage := page*pageSize - pageSize //起始index
-	ePage := page * pageSize          //结束index
-	total := len(res)                 //数据总页数
-
 	//分页
-	if len(res) < pageSize-1 {
-		response.DataWtihPage(c, res, total)
-	} else if ePage > total {
-		ret := res[sPage:total]
-		response.DataWtihPage(c, ret, total)
-	} else {
-		ret := res[sPage : ePage-1]
-		response.DataWtihPage(c, ret, total)
-	}
+	total := len(res) //数据总页数
+	ret := getPageData(res, page, pageSize)
+	response.DataWtihPage(c, ret, total)
 }
 
 //UpdateUser 更新用户信息

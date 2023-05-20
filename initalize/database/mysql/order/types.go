@@ -33,3 +33,12 @@ type OrderDetails struct {
 	PublicationDate string `json:"publication_date"` // 出版日
 	Press           string `json:"press"`            // 出版社
 }
+
+type ExportBookData struct {
+	Title       string `json:"title"`        // 书名
+	ISBN        string `json:"isbn"`         // 书ISBN号
+	Press       string `json:"press"`        // 出版社
+	Type        string `json:"type"`         // 类型 漫画/小说
+	Restriction int    `json:"restriction"`  // 判断是否为限制级 1为是限制级
+	TotalAmount int    `json:"total_amount"` // 合并后的总数
+}

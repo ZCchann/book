@@ -31,6 +31,7 @@ func Register(r *gin.Engine) {
 		orderList.GET("/get_order", order.GetOrder)
 		orderList.GET("/get_all_order", order.GetAllOrder)
 		orderList.GET("/get_order_details", order.GetOrderDetails)
+		orderList.GET("/export_order_data", order.ExportOrderData)
 		orderList.POST("/create", order.CreateOrder)
 
 	}

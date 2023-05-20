@@ -147,7 +147,7 @@ func UpdateUserPassword(uuid, Email, Password string, authorityID int) error {
 
 // SearchUser 通过用户名搜索用户信息
 func SearchUser(username string) (result []User, err error) {
-	rows, err := mysql.Mysql().DB.Query(fmt.Sprintf("SELECT id,username,email from user where username REGEXP '%s';", username))
+	rows, err := mysql.Mysql().DB.Query(fmt.Sprintf("SELECT id,username,email,uuid ,authorityID from user where username REGEXP '%s';", username))
 	if err != nil {
 		log.Println(err)
 		return result, err
@@ -155,7 +155,7 @@ func SearchUser(username string) (result []User, err error) {
 	_ = rows.Scan()
 	for rows.Next() {
 		var f User
-		err = rows.Scan(&f.Id, &f.Username, &f.Email)
+		err = rows.Scan(&f.Id, &f.Username, &f.Email, &f.UUID, &f.AuthorityID)
 		if err != nil {
 			log.Println(err)
 			return nil, err

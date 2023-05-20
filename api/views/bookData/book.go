@@ -9,6 +9,19 @@ import (
 	"strconv"
 )
 
+// getPageData 返回分页数据
+func getPageData(data []book.BookData, page int, pageSize int) []book.BookData {
+	start := (page - 1) * pageSize
+	end := page * pageSize
+	if start > len(data) {
+		return []book.BookData{}
+	}
+	if end > len(data) {
+		end = len(data)
+	}
+	return data[start:end]
+}
+
 // GetAllBookData 按照前端所需数量 返回数据库中数据给前端
 // @Router /book/getAllData[get]
 func GetAllBookData(c *gin.Context) {
@@ -19,18 +32,10 @@ func GetAllBookData(c *gin.Context) {
 		response.Error(c, "ShouldBindJSON："+err.Error())
 		return
 	}
-	sPage := page*pageSize - pageSize //起始index
-	ePage := page * pageSize          //结束index
-	total := len(res)                 //数据总页数
 
-	//分页
-	if page > 1 || ePage > total {
-		ret := res[sPage:total]
-		response.DataWtihPage(c, ret, total)
-	} else {
-		ret := res[sPage:ePage]
-		response.DataWtihPage(c, ret, total)
-	}
+	total := len(res) //数据总页数
+	ret := getPageData(res, page, pageSize)
+	response.DataWtihPage(c, ret, total)
 }
 
 // DelBookData @Router /book/delData/[delete]
@@ -111,20 +116,9 @@ func SearchBookData(c *gin.Context) {
 		return
 	}
 
-	sPage := page*pageSize - pageSize //起始index
-	ePage := page * pageSize          //结束index
-	total := len(res)                 //数据总页数
-
-	//分页
-	if len(res) < pageSize-1 {
-		response.DataWtihPage(c, res, total)
-	} else if ePage > total {
-		ret := res[sPage:total]
-		response.DataWtihPage(c, ret, total)
-	} else {
-		ret := res[sPage : ePage-1]
-		response.DataWtihPage(c, ret, total)
-	}
+	total := len(res) //数据总页数
+	ret := getPageData(res, page, pageSize)
+	response.DataWtihPage(c, ret, total)
 }
 
 func FileUpdate(c *gin.Context) {
