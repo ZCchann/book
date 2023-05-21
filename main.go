@@ -4,6 +4,7 @@ import (
 	"book/api/router"
 	"book/initalize/conf"
 	"book/initalize/database"
+	"book/initalize/message"
 	"github.com/gin-gonic/gin"
 	"log"
 	"os"
@@ -28,15 +29,15 @@ func main() {
 	r := gin.Default()
 	router.Register(r)
 
-	//log.Println("初始化Line机器人")
-	//err := message.Line().InitLine()
-	//if err != nil {
-	//	log.Println(err)
-	//	return
-	//}
+	log.Println("初始化Line机器人")
+	err := message.Line().InitLine()
+	if err != nil {
+		log.Println(err)
+		return
+	}
 
 	log.Println("启动监听")
-	err := r.Run(":5000")
+	err = r.Run(":5000")
 	if err != nil {
 		log.Fatalln(err)
 	}

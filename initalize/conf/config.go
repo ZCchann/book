@@ -14,7 +14,8 @@ type (
 		Debug   bool        `json:"debug"            desc:"是否开启Debug模式"`
 		Mysql   mysqlConfig `json:"mysql"            desc:"mysql配置"`
 		Redis   redisConfig `json:"redis"            desc:"redis"`
-		LineBot lineBot     `json:"line_bot"`
+		LineBot lineBot     `json:"line_bot"         desc:"line机器人相关"`
+		Mail    mail        `json:"mail"             desc:"邮件相关"`
 	}
 	mysqlConfig struct {
 		Username string `json:"username"`
@@ -32,6 +33,12 @@ type (
 		ChannelSecret      string `json:"channel_secret"       desc:"频道secret token" `
 		ChannelAccessToken string `json:"channel_access_token" desc:"access token"`
 		GroupID            string `json:"group_id"`
+	}
+	mail struct {
+		Mail       string `json:"mail"         desc:"邮箱地址"`
+		Password   string `json:"password"     desc:"邮箱密码/授权码"`
+		SmtpServer string `json:"smtp_server"  desc:"SMTP服务器地址"`
+		SmtpPort   int    `json:"smtp_port"    desc:"SMTP端口号"`
 	}
 )
 
