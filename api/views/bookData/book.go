@@ -123,7 +123,6 @@ func SearchBookData(c *gin.Context) {
 
 func FileUpdate(c *gin.Context) {
 	f, _ := c.FormFile("file")
-	log.Println(f.Filename)
 	//SaveUploadedFile上传表单文件到指定的路径
 	err := c.SaveUploadedFile(f, "./file/"+f.Filename)
 	if err != nil {

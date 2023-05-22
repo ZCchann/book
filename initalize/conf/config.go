@@ -11,11 +11,11 @@ import (
 
 type (
 	conf struct {
-		Debug   bool        `json:"debug"            desc:"是否开启Debug模式"`
-		Mysql   mysqlConfig `json:"mysql"            desc:"mysql配置"`
-		Redis   redisConfig `json:"redis"            desc:"redis"`
-		LineBot lineBot     `json:"line_bot"         desc:"line机器人相关"`
-		Mail    mail        `json:"mail"             desc:"邮件相关"`
+		Debug      bool        `json:"debug"            desc:"是否开启Debug模式"`
+		Mysql      mysqlConfig `json:"mysql"            desc:"mysql配置"`
+		Redis      redisConfig `json:"redis"            desc:"redis"`
+		LineBot    lineBot     `json:"line_bot"         desc:"line机器人相关"`
+		MailServer mail        `json:"mail_server"             desc:"邮件相关"`
 	}
 	mysqlConfig struct {
 		Username string `json:"username"`

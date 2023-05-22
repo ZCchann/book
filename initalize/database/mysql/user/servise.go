@@ -2,18 +2,10 @@ package user
 
 import (
 	"book/initalize/database/mysql"
+	"database/sql"
 	"fmt"
 	"log"
 )
-
-type User struct {
-	Id          string `json:"id"`
-	Username    string `json:"username"`
-	Password    string `json:"password"`
-	Email       string `json:"email"`
-	UUID        string `json:"uuid"`
-	AuthorityID int    `json:"authorityid"`
-}
 
 //GetUser 通过用户名获取用户信息
 func GetUser(UserName string) (u User, err error) {
@@ -117,17 +109,26 @@ func DelUser(UUID string) error {
 }
 
 //UpdateUserPassword 更新用户密码
-func UpdateUserPassword(uuid, Email, Password string, authorityID int) error {
+func UpdateUserPassword(uuid, Email, Password, Form string, authorityID int) error {
 	tx, err := mysql.Mysql().DB.Begin()
 	if err != nil {
 		log.Println("tx fail")
 	}
-
-	// 准备sql语句
-	stmt, err := tx.Prepare("UPDATE user SET password = ?, email= ? ,authorityID= ? WHERE uuid = ?")
-	if err != nil {
-		log.Println("prepare fail")
-		return err
+	var stmt *sql.Stmt
+	if Form == "admin" {
+		// 准备sql语句
+		stmt, err = tx.Prepare("UPDATE user SET password = ?, email= ? ,authorityID= ? WHERE uuid = ?")
+		if err != nil {
+			log.Println("prepare fail")
+			return err
+		}
+	} else {
+		// 准备sql语句
+		stmt, err = tx.Prepare("UPDATE user SET password = ?, email= ? WHERE uuid = ?")
+		if err != nil {
+			log.Println("prepare fail")
+			return err
+		}
 	}
 
 	// 传参到sql中执行
@@ -167,26 +168,44 @@ func SearchUser(username string) (result []User, err error) {
 }
 
 // UpdateUserEmail 更新用户信息
-func UpdateUserEmail(uuid, email string, authorityID int) (err error) {
+func UpdateUserEmail(uuid, email, Form string, authorityID int) (err error) {
 	tx, err := mysql.Mysql().DB.Begin()
 	if err != nil {
 		log.Println("tx fail")
 		return err
 	}
-
-	// 准备sql语句
-	stmt, err := tx.Prepare("UPDATE user SET email = ? ,authorityID = ? WHERE uuid = ?")
-	if err != nil {
-		log.Println("prepare fail")
-		return err
+	//var stmt *sql.Stmt
+	if Form == "admin" {
+		// 准备sql语句
+		stmt, err := tx.Prepare("UPDATE user SET email = ? ,authorityID = ? WHERE uuid = ?")
+		if err != nil {
+			log.Println("prepare fail")
+			return err
+		}
+		_, err = stmt.Exec(email, authorityID, uuid)
+		if err != nil {
+			log.Println("exec fail")
+			return err
+		}
+	} else {
+		// 准备sql语句
+		log.Println(1)
+		stmt, err := tx.Prepare("UPDATE user SET email = ?  WHERE uuid = ?")
+		if err != nil {
+			log.Println(2)
+			log.Println("prepare fail")
+			return err
+		}
+		// 传参到sql中执行
+		log.Println(3)
+		_, err = stmt.Exec(email, uuid)
+		if err != nil {
+			log.Println(4)
+			log.Println("exec fail")
+			return err
+		}
 	}
 
-	// 传参到sql中执行
-	_, err = stmt.Exec(email, authorityID, uuid)
-	if err != nil {
-		log.Println("exec fail")
-		return err
-	}
 	// 提交
 	err = tx.Commit()
 	if err != nil {

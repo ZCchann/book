@@ -41,7 +41,7 @@ func AddUserAddress(requestsData Address, uuid string) (err error) {
 	return nil
 }
 
-// 获取用户所有地址信息
+// GetUserAllAddress 获取用户所有地址信息
 func GetUserAllAddress(uuid string) (result []Address, err error) {
 	rows, err := mysql.Mysql().DB.Query("SELECT address_id ,addressee,telephone,address FROM address WHERE uuid = ? ", uuid)
 	if err != nil {
@@ -61,7 +61,7 @@ func GetUserAllAddress(uuid string) (result []Address, err error) {
 	return result, err
 }
 
-// 获取指定uuid对应的 addressID的地址
+// GetUserAddress 获取指定uuid对应的 addressID的地址
 func GetUserAddress(uuid, AddressId string) (result Address, err error) {
 	err = mysql.Mysql().DB.QueryRow("SELECT address_id,addressee,telephone,address FROM address WHERE address_id = ? and uuid=? ",
 		AddressId, uuid).Scan(&result.AddressID, &result.Addressee, &result.Telephone, &result.Address)

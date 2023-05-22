@@ -2,6 +2,7 @@ package router
 
 import (
 	"book/api/user"
+	util2 "book/api/util"
 	"book/api/views/bookData"
 	"book/api/views/order"
 	"book/pkg/grf/middleware"
@@ -34,6 +35,10 @@ func Register(r *gin.Engine) {
 		orderList.GET("/export_order_data", order.ExportOrderData)
 		orderList.POST("/create", order.CreateOrder)
 
+	}
+	util := r.Group("/util")
+	{
+		util.GET("/send_verification_code", util2.SendVerificationCode)
 	}
 
 }
