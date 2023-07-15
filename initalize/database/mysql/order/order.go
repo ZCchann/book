@@ -31,7 +31,7 @@ func CreateOrder(uuid, name, telephone, address string) (number string, err erro
 
 // getOrderNumber 获取指定时间的订单编号
 func getOrderNumber(createTime int64, uuid string) (number string, err error) {
-	err = mysql.Mysql().Table("orderform").Where("create_time=? AND uuid=?", createTime, uuid).First(&number).Error
+	err = mysql.Mysql().Table("orderform").Select("number").Where("create_time=? AND uuid=?", createTime, uuid).Find(&number).Error
 	if err != nil {
 		err = fmt.Errorf("getOrderNumber 查询orderform错误 请检查: %s", err)
 		return
@@ -43,9 +43,9 @@ func getOrderNumber(createTime int64, uuid string) (number string, err error) {
 // AddOrderList 新增订单详情
 func AddOrderList(orderList []OrderList, orderNumber string) (err error) {
 	timestamp := time.Now().Unix()
-	for _, i := range orderList {
-		i.Number = orderNumber
-		i.CreateTime = timestamp
+	for i := range orderList {
+		orderList[i].Number = orderNumber
+		orderList[i].CreateTime = timestamp
 	}
 	err = mysql.Mysql().Table("orderlist").Create(&orderList).Error
 	if err != nil {

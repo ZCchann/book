@@ -11,7 +11,7 @@ type OrderForm struct {
 
 type OrderList struct {
 	Number     string `json:"number"` // 订单编号
-	BookID     int    `json:"id"`
+	BookID     int    `json:"id" gorm:"column:bookid"`
 	Amount     int    `json:"amount"`
 	TotalPrice int    `json:"total_price"`
 	CreateTime int64  `json:"create_time"`
