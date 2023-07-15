@@ -30,6 +30,7 @@ type (
 		Database int    `json:"database"`
 	}
 	lineBot struct {
+		State              bool   `json:"state" desc:"是否启用line bot"`
 		ChannelSecret      string `json:"channel_secret"       desc:"频道secret token" `
 		ChannelAccessToken string `json:"channel_access_token" desc:"access token"`
 		GroupID            string `json:"group_id"`
