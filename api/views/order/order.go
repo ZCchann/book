@@ -42,12 +42,7 @@ func CreateOrder(c *gin.Context) {
 
 	errList := order.AddOrderList(request.OrderData, orderNumber)
 	if errList != nil {
-		errNumber := len(errList)
-		var errStr string
-		for _, i := range errList {
-			errStr += i
-		}
-		response.Error(c, fmt.Sprintf("失败%d条数据,失败信息: %d", errNumber, errStr))
+		response.Error(c, errList.Error())
 		return
 	}
 	response.Success(c)

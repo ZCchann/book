@@ -30,7 +30,7 @@ func AddUser(c *gin.Context) {
 		response.Error(c, "ShouldBindJSON："+err.Error())
 		return
 	}
-	err := user.AddUser(request.Username, request.Password, request.Email, request.AuthorityID)
+	err := user.AddUser(request)
 	if err != nil {
 		response.BadRequest(c, err.Error())
 		log.Println(err.Error())

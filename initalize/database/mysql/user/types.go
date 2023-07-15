@@ -6,7 +6,7 @@ type User struct {
 	Password    string `json:"password"`
 	Email       string `json:"email"`
 	UUID        string `json:"uuid"`
-	AuthorityID int    `json:"authorityid"`
+	AuthorityID int    `json:"authorityid" gorm:"column:authorityID"`
 }
 
 type UpdateUser struct {

@@ -2,235 +2,141 @@ package user
 
 import (
 	"book/initalize/database/mysql"
-	"database/sql"
 	"fmt"
-	"log"
 )
 
 //GetUser 通过用户名获取用户信息
-func GetUser(UserName string) (u User, err error) {
-	var data User
-	err = mysql.Mysql().DB.QueryRow("SELECT username,password,uuid FROM user WHERE username = ? ", UserName).Scan(&data.Username, &data.Password, &data.UUID)
+func GetUser(UserName string) (data User, err error) {
+	//var data User
+	//err = mysql.Mysql().DB.QueryRow("SELECT username,password,uuid FROM user WHERE username = ? ", UserName).Scan(&data.Username, &data.Password, &data.UUID)
+	//if err != nil {
+	//	log.Println(err.Error())
+	//	return
+	//}
+	//return data, err
+
+	err = mysql.Mysql().Select("username,password,uuid").Table("user").Where("username=?", UserName).Find(&data).Error
 	if err != nil {
-		log.Println(err.Error())
-		return
+		err = fmt.Errorf("GetUser 读取user表错误 请检查: %s", err)
+		return User{}, err
 	}
-	return data, err
+	return
 
 }
 
 //GetUserForID 通过ID获取用户信息 不含密码
 func GetUserForID(uuid string) (data User, err error) {
-	err = mysql.Mysql().DB.QueryRow("SELECT uuid,username,email,authorityID FROM user WHERE uuid = ? ", uuid).Scan(&data.UUID, &data.Username, &data.Email, &data.AuthorityID)
+	//err = mysql.Mysql().DB.QueryRow("SELECT uuid,username,email,authorityID FROM user WHERE uuid = ? ", uuid).Scan(&data.UUID, &data.Username, &data.Email, &data.AuthorityID)
+	//if err != nil {
+	//	log.Println(err.Error())
+	//	return
+	//}
+	//return data, err
+	err = mysql.Mysql().Table("user").Select("uuid,username,email,authorityID").Where("uuid=?", uuid).Find(&data).Error
 	if err != nil {
-		log.Println(err.Error())
-		return
+		err = fmt.Errorf("GetUserForID 读取user表错误 请检查: %s", err)
+		return User{}, err
 	}
-	return data, err
-
+	return
 }
 
 //GetAllUser 获取所有用户的用户名
 func GetAllUser() (result []User, err error) {
-	rows, err := mysql.Mysql().DB.Query("SELECT id,username,email,uuid ,authorityID FROM user")
+	err = mysql.Mysql().Table("user").Select("id,username,email,uuid,authorityID").Find(&result).Error
 	if err != nil {
-		log.Println(err)
-		return result, err
+		err = fmt.Errorf("GetAllUser 读取user表错误 请检查: %s", err)
+		return
 	}
-	for rows.Next() {
-		var f User
-		err = rows.Scan(&f.Id, &f.Username, &f.Email, &f.UUID, &f.AuthorityID)
-		if err != nil {
-			log.Println(err)
-			return nil, err
-		}
-		result = append(result, f)
-	}
-
-	return result, err
+	return
 }
 
 //AddUser 新增用户
-func AddUser(UserName, Password, Email string, authorityID int) error {
-	tx, err := mysql.Mysql().DB.Begin()
+func AddUser(request User) (err error) {
+	err = mysql.Mysql().Table("user").Create(&request).Error
 	if err != nil {
-		log.Println("tx fail")
-	}
-
-	// 准备sql语句
-	stmt, err := tx.Prepare("INSERT INTO user (`username`,`password`,`email`,`uuid`,`authorityID`) VALUE (?,?,?,replace(uuid(),\"-\",\"\"),?)")
-	if err != nil {
-		log.Println("prepare fail")
-		return err
-	}
-
-	// 传参到sql中执行
-	_, err = stmt.Exec(UserName, Password, Email, authorityID)
-	if err != nil {
-		log.Println("exec fail")
-		return err
-	}
-	// 提交
-	err = tx.Commit()
-	if err != nil {
-		log.Println("commit error ", err)
-		return err
+		err = fmt.Errorf("bookdata插入数据错误 请检查: %s", err)
+		return
 	}
 	return nil
 }
 
 // DelUser 删除用户
-func DelUser(UUID string) error {
-	tx, err := mysql.Mysql().DB.Begin()
+func DelUser(UUID string) (err error) {
+	err = mysql.Mysql().Table("user").Where("uuid=?", UUID).Delete(&User{}).Error
 	if err != nil {
-		log.Println("tx fail")
-	}
-
-	// 准备sql语句
-	stmt, err := tx.Prepare("DELETE FROM user WHERE uuid = ?")
-	if err != nil {
-		log.Println("prepare fail")
-		return err
-	}
-
-	// 传参到sql中执行
-	_, err = stmt.Exec(UUID)
-	if err != nil {
-		log.Println("exec fail")
-		return err
-	}
-	// 提交
-	err = tx.Commit()
-	if err != nil {
-		log.Println("commit error ", err)
-		return err
+		err = fmt.Errorf("user表删除数据错误 请检查: %s", err)
+		return
 	}
 	return nil
 }
 
 //UpdateUserPassword 更新用户密码
-func UpdateUserPassword(uuid, Email, Password, Form string, authorityID int) error {
-	tx, err := mysql.Mysql().DB.Begin()
-	if err != nil {
-		log.Println("tx fail")
-	}
-	var stmt *sql.Stmt
+func UpdateUserPassword(uuid, Email, Password, Form string, authorityID int) (err error) {
 	if Form == "admin" {
-		// 准备sql语句
-		stmt, err = tx.Prepare("UPDATE user SET password = ?, email= ? ,authorityID= ? WHERE uuid = ?")
+		err = mysql.Mysql().Table("user").Where("uuid = ?", uuid).Updates(map[string]interface{}{
+			"password":    Password,
+			"authorityID": authorityID,
+			"email":       Email,
+		}).Error
 		if err != nil {
-			log.Println("prepare fail")
-			return err
+			err = fmt.Errorf("UpdateUserPassword 更新user表错误 请检查: %s", err)
+			return
 		}
 	} else {
-		// 准备sql语句
-		stmt, err = tx.Prepare("UPDATE user SET password = ?, email= ? WHERE uuid = ?")
+		//	stmt, err := tx.Prepare("UPDATE user SET email = ?  WHERE uuid = ?")
+		err = mysql.Mysql().Table("user").Where("uuid = ?", uuid).Updates(map[string]interface{}{
+			"password": Password,
+			"email":    Email,
+		}).Error
 		if err != nil {
-			log.Println("prepare fail")
-			return err
+			err = fmt.Errorf("UpdateUserPassword 更新user表错误 请检查: %s", err)
+			return
 		}
 	}
-
-	// 传参到sql中执行
-	_, err = stmt.Exec(Password, Email, authorityID, uuid)
-	if err != nil {
-		log.Println("exec fail")
-		return err
-	}
-	// 提交
-	err = tx.Commit()
-	if err != nil {
-		log.Println("commit error ", err)
-		return err
-	}
-	return nil
+	return
 }
 
 // SearchUser 通过用户名搜索用户信息
 func SearchUser(username string) (result []User, err error) {
-	rows, err := mysql.Mysql().DB.Query(fmt.Sprintf("SELECT id,username,email,uuid ,authorityID from user where username REGEXP '%s';", username))
+	err = mysql.Mysql().Table("user").Select("id,username,email,uuid ,authorityID").Where("username REGEXP ?", username).Find(&result).Error
 	if err != nil {
-		log.Println(err)
-		return result, err
+		err = fmt.Errorf("SearchUser 读取user表错误 请检查: %s", err)
+		return
 	}
-	_ = rows.Scan()
-	for rows.Next() {
-		var f User
-		err = rows.Scan(&f.Id, &f.Username, &f.Email, &f.UUID, &f.AuthorityID)
-		if err != nil {
-			log.Println(err)
-			return nil, err
-		}
-		result = append(result, f)
-	}
-
-	return result, err
+	return
 }
 
 // UpdateUserEmail 更新用户信息
 func UpdateUserEmail(uuid, email, Form string, authorityID int) (err error) {
-	tx, err := mysql.Mysql().DB.Begin()
-	if err != nil {
-		log.Println("tx fail")
-		return err
-	}
-	//var stmt *sql.Stmt
 	if Form == "admin" {
-		// 准备sql语句
-		stmt, err := tx.Prepare("UPDATE user SET email = ? ,authorityID = ? WHERE uuid = ?")
+		err = mysql.Mysql().Table("user").Where("uuid = ?", uuid).Updates(map[string]interface{}{
+			"email":       email,
+			"authorityID": authorityID,
+		}).Error
 		if err != nil {
-			log.Println("prepare fail")
-			return err
-		}
-		_, err = stmt.Exec(email, authorityID, uuid)
-		if err != nil {
-			log.Println("exec fail")
-			return err
+			err = fmt.Errorf("UpdateUserEmail 更新user表错误 请检查: %s", err)
+			return
 		}
 	} else {
-		// 准备sql语句
-		log.Println(1)
-		stmt, err := tx.Prepare("UPDATE user SET email = ?  WHERE uuid = ?")
+		//	stmt, err := tx.Prepare("UPDATE user SET email = ?  WHERE uuid = ?")
+		err = mysql.Mysql().Table("user").Where("uuid = ?", uuid).Updates(map[string]interface{}{
+			"email": email,
+		}).Error
 		if err != nil {
-			log.Println(2)
-			log.Println("prepare fail")
-			return err
-		}
-		// 传参到sql中执行
-		log.Println(3)
-		_, err = stmt.Exec(email, uuid)
-		if err != nil {
-			log.Println(4)
-			log.Println("exec fail")
-			return err
+			err = fmt.Errorf("UpdateUserEmail 更新user表错误 请检查: %s", err)
+			return
 		}
 	}
-
-	// 提交
-	err = tx.Commit()
-	if err != nil {
-		log.Println("commit error ", err)
-		return err
-	}
-	return nil
+	return
 }
 
 // GetUserPermissionForID 通过权限ID查询用户
 func GetUserPermissionForID(PermissionID int) (result []User, err error) {
-	rows, err := mysql.Mysql().DB.Query(fmt.Sprintf("SELECT id, username, email, uuid, authorityID FROM user WHERE authorityID = %d", PermissionID))
+	err = mysql.Mysql().Table("user").Select("id,username,email,uuid,authorityID").Where("authorityID=?", PermissionID).Find(&result).Error
 	if err != nil {
-		log.Println(err)
-		return result, err
+		err = fmt.Errorf("GetUserPermissionForID 读取user表错误 请检查: %s", err)
+		return
 	}
-	for rows.Next() {
-		var f User
-		err = rows.Scan(&f.Id, &f.Username, &f.Email, &f.UUID, &f.AuthorityID)
-		if err != nil {
-			log.Println(err)
-			return nil, err
-		}
-		result = append(result, f)
-	}
+	return
 
-	return result, err
 }

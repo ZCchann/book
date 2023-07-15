@@ -40,8 +40,13 @@ func GetAllBookData(c *gin.Context) {
 
 // DelBookData @Router /book/delData/[delete]
 func DelBookData(c *gin.Context) {
-	id := c.Params.ByName("id")
-	err := book.DelBook(id)
+	id, err := strconv.Atoi(c.Params.ByName("id"))
+	if err != nil {
+		response.Error(c, err.Error())
+		log.Println(err.Error())
+		return
+	}
+	err = book.DelBook(id)
 	if err != nil {
 		response.BadRequest(c, err.Error())
 		log.Println(err.Error())
@@ -71,7 +76,6 @@ func EditBookData(c *gin.Context) {
 		response.Error(c, "ShouldBindJSON："+err.Error())
 		return
 	}
-	log.Println(request)
 	err := book.EditBook(request)
 	if err != nil {
 		response.BadRequest(c, err.Error())
@@ -149,7 +153,7 @@ func ParsingFile(filePath string) (result []book.BookData, err error) {
 	//第一行(0)为标题 标题不导入 从1开始
 	for i := 1; i < len(sheet); i++ {
 		fileData.ISBN = sheet[i][0]
-		fileData.Tittle = sheet[i][1]
+		fileData.Title = sheet[i][1]
 		fileData.Price, _ = strconv.Atoi(sheet[i][2])
 		fileData.Press = sheet[i][3]
 		fileData.Type = sheet[i][4]

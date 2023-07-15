@@ -3,43 +3,26 @@ package order
 import (
 	"book/initalize/database/mysql"
 	"fmt"
-	"log"
-	"strconv"
 	"time"
 )
 
 //新建订单
 func CreateOrder(uuid, name, telephone, address string) (number string, err error) {
-	tx, err := mysql.Mysql().DB.Begin()
-	if err != nil {
-		log.Println("tx fail")
-	}
-
-	// 准备sql语句
-	stmt, err := tx.Prepare("INSERT INTO orderform (`uuid`,`create_time`,`addressee`,`telephone`,`address`) VALUE (?,?,?,?,?)")
-	if err != nil {
-		log.Println("prepare fail")
-		return "", err
-	}
-
-	// 获取时间戳
 	TimeStamp := time.Now().Unix()
+	var order createOrder
+	order.UUID = uuid
+	order.CreateTime = TimeStamp
+	order.Addressee = name
+	order.Address = address
+	order.Telephone = telephone
 
-	// 传参到sql中执行
-	_, err = stmt.Exec(uuid, TimeStamp, name, telephone, address)
+	err = mysql.Mysql().Table("orderform").Create(&order).Error
 	if err != nil {
-		log.Println("exec fail")
-		return "", err
-	}
-	// 提交
-	err = tx.Commit()
-	if err != nil {
-		log.Println("commit error ", err)
-		return "", err
+		err = fmt.Errorf("orderform插入数据错误 请检查: %s", err)
+		return
 	}
 	number, err = getOrderNumber(TimeStamp, uuid)
 	if err != nil {
-		log.Println("get number error: ", err)
 		return "", err
 	}
 	return number, nil
@@ -48,130 +31,73 @@ func CreateOrder(uuid, name, telephone, address string) (number string, err erro
 
 // getOrderNumber 获取指定时间的订单编号
 func getOrderNumber(createTime int64, uuid string) (number string, err error) {
-	err = mysql.Mysql().DB.QueryRow("SELECT number FROM orderform WHERE create_time = ? and uuid=? ", createTime, uuid).Scan(&number)
+	err = mysql.Mysql().Table("orderform").Where("create_time=? AND uuid=?", createTime, uuid).First(&number).Error
 	if err != nil {
-		log.Println(err)
+		err = fmt.Errorf("getOrderNumber 查询orderform错误 请检查: %s", err)
 		return
 	}
-	return number, err
+	return
+
 }
 
 // AddOrderList 新增订单详情
-func AddOrderList(orderList []OrderList, orderNumber string) (err []string) {
-	var errList []string
-
-	for i := 0; i < len(orderList); i++ {
-		tx, err := mysql.Mysql().DB.Begin()
-		if err != nil {
-			log.Println("tx fail")
-		}
-		bookID := orderList[i].BookID
-		amount := orderList[i].Amount
-		totalPrice := orderList[i].TotalPrice
-		timestamp := time.Now().Unix()
-		// 准备sql语句
-		stmt, err := tx.Prepare("INSERT INTO orderlist (`number`,`bookid`,`amount`,`total_price`,`create_time`) VALUE (?,?,?,?,?)")
-		if err != nil {
-			log.Println("prepare fail")
-			errList = append(errList, fmt.Sprintf("bookID %s error: %s"), strconv.Itoa(bookID), err.Error())
-			continue
-		}
-		// 传参到sql中执行
-		_, err = stmt.Exec(orderNumber, bookID, amount, totalPrice, timestamp)
-		if err != nil {
-			log.Println("exec fail")
-			errList = append(errList, fmt.Sprintf("bookID %s error: %s"), strconv.Itoa(bookID), err.Error())
-			continue
-		}
-		// 提交
-		err = tx.Commit()
-		if err != nil {
-			log.Println("commit error ", err)
-			errList = append(errList, fmt.Sprintf("bookID %s error: %s"), strconv.Itoa(bookID), err.Error())
-			continue
-		}
+func AddOrderList(orderList []OrderList, orderNumber string) (err error) {
+	timestamp := time.Now().Unix()
+	for _, i := range orderList {
+		i.Number = orderNumber
+		i.CreateTime = timestamp
 	}
-
-	if len(errList) > 0 {
-		return errList
+	err = mysql.Mysql().Table("orderlist").Create(&orderList).Error
+	if err != nil {
+		err = fmt.Errorf("orderlist插入数据错误 请检查: %s", err)
+		return
 	}
 	return nil
 }
 
 // GetOrderList 获取订单信息
 func GetOrderList(uuid string) (result []OrderForm, err error) {
-	rows, err := mysql.Mysql().DB.Query("SELECT number,addressee,telephone,address,create_time from orderform where  uuid = ?;", uuid)
+	err = mysql.Mysql().Table("orderform").Where("uuid=?", uuid).Find(&result).Error
 	if err != nil {
-		log.Println("1 ", err)
+		err = fmt.Errorf("GetOrderList 查询orderform错误 请检查: %s", err)
 		return
 	}
-
-	for rows.Next() {
-		var f OrderForm
-		err = rows.Scan(&f.Number, &f.Addressee, &f.Telephone, &f.Address, &f.CreateTime)
-		if err != nil {
-			log.Println(err)
-			return nil, err
-		}
-		result = append(result, f)
-	}
-	return result, err
+	return
 }
 
 func GetOrderDetails(orderNumber string) (result []OrderDetails, err error) {
-	rows, err := mysql.Mysql().DB.Query("select orderlist.number,orderlist.amount,orderlist.total_price,bookdata.title,bookdata.type,bookdata.price, bookdata.isbn,bookdata.publicationDate,bookdata.press from orderlist, bookdata where orderlist.bookid=bookdata.id and number=?;", orderNumber)
+	err = mysql.Mysql().Joins("JOIN bookdata ON orderlist.bookid = bookdata.id").Table("orderlist").
+		Select("orderlist.number, orderlist.amount, orderlist.total_price, bookdata.title, bookdata.type, bookdata.price, bookdata.isbn, bookdata.publicationDate, bookdata.press").
+		Where("orderlist.number = ?", orderNumber).Find(&result).Error
 	if err != nil {
-		log.Println("1 ", err)
+		err = fmt.Errorf("GetOrderDetails 查询orderlist错误 请检查: %s", err)
 		return
 	}
+	return
 
-	for rows.Next() {
-		var f OrderDetails
-		err = rows.Scan(&f.Number, &f.Amount, &f.TotalPrice, &f.Title, &f.Type, &f.Price, &f.ISBN, &f.PublicationDate, &f.Press)
-		if err != nil {
-			log.Println(err)
-			return nil, err
-		}
-		result = append(result, f)
-	}
-	return result, err
 }
 
 // GetAllOrderList 获取所有订单信息
 func GetAllOrderList() (result []OrderForm, err error) {
-	rows, err := mysql.Mysql().DB.Query("SELECT number,addressee,telephone,address,create_time from orderform;")
+	err = mysql.Mysql().Table("orderform").Find(&result).Error
 	if err != nil {
-		log.Println(err)
+		err = fmt.Errorf("GetAllOrderList 查询orderform错误 请检查: %s", err)
 		return
 	}
-
-	for rows.Next() {
-		var f OrderForm
-		err = rows.Scan(&f.Number, &f.Addressee, &f.Telephone, &f.Address, &f.CreateTime)
-		if err != nil {
-			log.Println(err)
-			return nil, err
-		}
-		result = append(result, f)
-	}
-	return result, err
+	return
 }
 
 // ExportOrderData 导出订单信息
 func ExportOrderData(orderListID string) (result []ExportBookData, err error) {
-	rows, err := mysql.Mysql().DB.Query(fmt.Sprintf("SELECT SUM(orderlist.amount) as total_amount, bookdata.title ,bookdata.isbn,bookdata.press,bookdata.type, bookdata.restriction FROM orderlist orderlist INNER JOIN bookdata bookdata ON orderlist.bookid = bookdata.id WHERE orderlist.number IN (%s) GROUP BY orderlist.bookid, bookdata.id", orderListID))
+	err = mysql.Mysql().Table("orderlist").
+		Select("SUM(orderlist.amount) as total_amount, bookdata.title, bookdata.isbn, bookdata.press, bookdata.type, bookdata.restriction").
+		Joins("INNER JOIN bookdata ON orderlist.bookid = bookdata.id").
+		Where("orderlist.number IN (?)", orderListID).
+		Group("orderlist.bookid, bookdata.id").
+		Scan(&result).Debug().Error
 	if err != nil {
-		log.Println(err)
-		return result, err
+		err = fmt.Errorf("ExportOrderData 导出订单信息错误 请检查: %s", err)
+		return nil, err
 	}
-	for rows.Next() {
-		var f ExportBookData
-		err = rows.Scan(&f.TotalAmount, &f.Title, &f.ISBN, &f.Press, &f.Type, &f.Restriction)
-		if err != nil {
-			return nil, err
-		}
-		result = append(result, f)
-	}
-
-	return result, err
+	return
 }

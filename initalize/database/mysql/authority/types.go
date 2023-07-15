@@ -8,8 +8,12 @@ type Permission struct {
 }
 type EditPermissions struct {
 	ID          int          `json:"id"`
-	RuleName    string       `json:"rule_name"`
+	RuleName    string       `json:"rule_name" gorm:"column:rulename"`
 	Permissions []Permission `json:"permissions"`
+}
+type RetPermissions struct {
+	ID       int    `json:"id"`
+	RuleName string `json:"rule_name" gorm:"column:rulename"`
 }
 
 type Column struct {

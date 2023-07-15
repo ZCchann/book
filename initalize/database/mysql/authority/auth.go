@@ -2,159 +2,113 @@ package authority
 
 import (
 	"book/initalize/database/mysql"
-	"log"
+	"fmt"
 )
 
 // GetRuleForUUID 通过UUID 查询权限详情
 func GetRuleForUUID(uuid string) (result Authority, err error) {
-	err = mysql.Mysql().DB.QueryRow("SELECT authority.data_management, authority.order_management, authority.permission_management, authority.user_management FROM user JOIN authority ON user.authorityID = authority.id WHERE user.uuid = ?;", uuid).Scan(&result.DataManagement, &result.OrderManagement, &result.PermissionManagement, &result.UserManagement)
+	err = mysql.Mysql().Joins("JOIN authority ON user.authorityID = authority.id").
+		Select("authority.data_management, authority.order_management, authority.permission_management, authority.user_management").Table("user").Where("user.uuid = ?", uuid).First(&result).Error
 	if err != nil {
+		err = fmt.Errorf("GetRuleForUUID 查询错误 请检查: %s", err)
 		return
 	}
-	return result, err
+	return
+
 }
 
 // GetPermissionsFirst 所有数据库第一条结果
 func GetPermissionsFirst() (result Authority, err error) {
-	err = mysql.Mysql().DB.QueryRow("select * from authority LIMIT 0,1;").Scan(&result.ID, &result.DataManagement, &result.OrderManagement, &result.PermissionManagement, &result.UserManagement, &result.RuleName)
+	err = mysql.Mysql().Table("authority").First(&result).Error
 	if err != nil {
+		err = fmt.Errorf("GetPermissionsFirst 查询错误 请检查: %s", err)
 		return
 	}
-	return result, err
+	return
 }
 
 // GetAllPermissionsIDName 返回所有的权限组ID、权限名称
-func GetAllPermissionsIDName() (result []EditPermissions, err error) {
-	rows, err := mysql.Mysql().DB.Query("select id,rulename from authority;")
+func GetAllPermissionsIDName() (result []RetPermissions, err error) {
+	err = mysql.Mysql().Table("authority").Select("id,rulename").Find(&result).Error
 	if err != nil {
+		err = fmt.Errorf("GetAllPermissionsIDName 查询错误 请检查: %s", err)
 		return
 	}
-	for rows.Next() {
-		var f EditPermissions
-		err = rows.Scan(&f.ID, &f.RuleName)
-		if err != nil {
-			return nil, err
-		}
-		result = append(result, f)
-	}
-
-	return result, err
+	return
 }
 
 // GetPermissionsByID 通过ID获取权限详情
 func GetPermissionsByID(ID string) (result Authority, err error) {
-	err = mysql.Mysql().DB.QueryRow("select * from authority where id= ?", ID).Scan(&result.ID, &result.DataManagement, &result.OrderManagement, &result.PermissionManagement, &result.UserManagement, &result.RuleName)
+	err = mysql.Mysql().Table("authority").Where("id=?", ID).Find(&result).Error
 	if err != nil {
+		err = fmt.Errorf("GetPermissionsByID 查询错误 请检查: %s", err)
 		return
 	}
-	return result, err
+	return
+
 }
 
 // AddPermission 添加权限组信息
 func AddPermission(data EditPermissions) (err error) {
-	tx, err := mysql.Mysql().DB.Begin()
-	if err != nil {
-		log.Println("tx fail")
-		return err
-	}
-	stmt, err := tx.Prepare("INSERT INTO authority (`data_management`,`order_management`,`permission_management`,`user_management`,`rulename`) VALUE (?,?,?,?,?);")
-	if err != nil {
-		log.Println("prepare fail")
-		return err
-	}
-	var DataManagement, OrderManagement, permissionManagement, userManagement bool
+	var auth Authority
 
 	for _, i := range data.Permissions {
-		log.Println("name ", i.Name, " status ", i.State)
 		switch i.Name {
 		case "DataManagement":
-			DataManagement = i.State
+			auth.DataManagement = i.State
 		case "OrderManagement":
-			OrderManagement = i.State
+			auth.OrderManagement = i.State
 		case "PermissionManagement":
-			permissionManagement = i.State
+			auth.PermissionManagement = i.State
 		case "UserManagement":
-			userManagement = i.State
+			auth.UserManagement = i.State
 		}
 	}
 
-	// 传参到sql中执行
-	_, err = stmt.Exec(DataManagement, OrderManagement, permissionManagement, userManagement, data.RuleName)
+	err = mysql.Mysql().Table("authority").Create(&auth).Error
 	if err != nil {
-		log.Println("exec fail")
-		return err
-	}
-	// 提交
-	err = tx.Commit()
-	if err != nil {
-		log.Println("commit error ", err)
-		return err
+		err = fmt.Errorf("authority插入数据错误 请检查: %s", err)
+		return
 	}
 	return nil
+
 }
 
 // UpdatePermissionsByID 根据权限ID更改内容
 func UpdatePermissionsByID(data EditPermissions) (err error) {
-	tx, err := mysql.Mysql().DB.Begin()
-	if err != nil {
-		log.Println("tx fail")
-		return err
-	}
-	var DataManagement, OrderManagement, permissionManagement, userManagement bool
+	var auth Authority
 
 	for _, i := range data.Permissions {
-		log.Println("name ", i.Name, " status ", i.State)
 		switch i.Name {
 		case "DataManagement":
-			DataManagement = i.State
+			auth.DataManagement = i.State
 		case "OrderManagement":
-			OrderManagement = i.State
+			auth.OrderManagement = i.State
 		case "PermissionManagement":
-			permissionManagement = i.State
+			auth.PermissionManagement = i.State
 		case "UserManagement":
-			userManagement = i.State
+			auth.UserManagement = i.State
 		}
 	}
 
-	stmt, err := tx.Prepare("UPDATE authority SET data_management=?,order_management=?,permission_management=?,user_management=? WHERE id=?")
+	err = mysql.Mysql().Table("authority").Where("id=?", data.ID).Save(&auth).Error
 	if err != nil {
-		log.Println("Prepare fail ", err)
-		return err
+		err = fmt.Errorf("authority 更新数据错误 请检查: %s", err)
+		return
 	}
-	_, err = stmt.Exec(DataManagement, OrderManagement, permissionManagement, userManagement, data.ID)
-	if err != nil {
-		log.Println("exec fail ", err)
-		return err
-	}
-	tx.Commit()
 	return nil
+
 }
 
 // DeletePermissionByID 通过权限组ID删除权限组
 func DeletePermissionByID(PermissionID int) (err error) {
-	tx, err := mysql.Mysql().DB.Begin()
-	if err != nil {
-		log.Println("tx fail")
-		return err
-	}
+	var data Authority
+	data.ID = PermissionID
 
-	// 准备sql语句
-	stmt, err := tx.Prepare("DELETE FROM authority WHERE id = ?")
+	err = mysql.Mysql().Table("authority").Where("id=?", data.ID).Delete(&Authority{}).Error
 	if err != nil {
-		log.Println("prepare fail")
-		return err
-	}
-
-	// 传参到sql中执行
-	_, err = stmt.Exec(PermissionID)
-	if err != nil {
-		log.Println("exec fail")
-		return err
-	}
-	// 提交
-	err = tx.Commit()
-	if err != nil {
-		log.Println("commit error ", err)
+		err = fmt.Errorf("bookdata删除数据错误 请检查: %s", err)
+		return
 	}
 	return nil
 }
