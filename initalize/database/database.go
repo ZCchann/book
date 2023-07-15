@@ -8,13 +8,7 @@ import (
 )
 
 func InitMysql() {
-	mysql.Mysql().InitDB(
-		conf.Conf().Mysql.Username,
-		conf.Conf().Mysql.Password,
-		conf.Conf().Mysql.Host,
-		conf.Conf().Mysql.Port,
-		conf.Conf().Mysql.Database,
-	)
+	mysql.InitDB()
 }
 
 func InitRedis() {

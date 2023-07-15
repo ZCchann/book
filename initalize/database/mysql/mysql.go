@@ -1,29 +1,30 @@
 package mysql
 
 import (
-	"database/sql"
-	_ "github.com/go-sql-driver/mysql"
+	"book/initalize/conf"
+	"fmt"
+	"gorm.io/driver/mysql"
+	"gorm.io/gorm"
 	"log"
-	"strings"
 )
 
-type mdb struct {
-	*sql.DB
-}
+var m *gorm.DB
 
-var m = new(mdb)
-
-func Mysql() *mdb {
+func Mysql() *gorm.DB {
 	return m
 }
 
-func (m *mdb) InitDB(username, password, host, port, database string) {
-	path := strings.Join([]string{username, ":", password, "@tcp(", host, ":", port, ")/", database, "?charset=utf8&parseTime=true"}, "")
-	m.DB, _ = sql.Open("mysql", path)
-	m.SetConnMaxLifetime(100)
-	m.SetMaxIdleConns(10)
-	if err := m.Ping(); err != nil {
-		log.Println("open database fail err: ", err)
+func InitDB() {
+	username := conf.Conf().Mysql.Username
+	password := conf.Conf().Mysql.Password
+	host := conf.Conf().Mysql.Host
+	port := conf.Conf().Mysql.Port
+	database := conf.Conf().Mysql.Database
+	sqlUrl := fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?charset=utf8&parseTime=True&loc=Local", username, password, host, port, database)
+	db, err := gorm.Open(mysql.Open(sqlUrl), nil)
+	if err != nil {
+		log.Fatal("连接mysql数据库错误 请检查: ", err)
 		return
 	}
+	m = db
 }

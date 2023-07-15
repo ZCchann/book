@@ -13,8 +13,15 @@
     "database": 0
   },
   "line_bot": {
+      "state": false,
       "channel_secret": "",
       "channel_access_token": "",
       "group_id": ""
+    },
+  "mail_server": {
+      "mail": "",
+      "password": "",
+      "smtp_server": "",
+      "smtp_port": 587
     }
 }

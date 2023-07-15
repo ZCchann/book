@@ -2,6 +2,7 @@ package view
 
 import (
 	"book/initalize/database/mysql/user"
+	"book/pkg/grf/util"
 	"book/pkg/response"
 	"github.com/gin-gonic/gin"
 	"log"
@@ -29,7 +30,7 @@ func AddUser(c *gin.Context) {
 		response.Error(c, "ShouldBindJSON："+err.Error())
 		return
 	}
-	err := user.AddUser(request.Username, request.Password, request.Email, request.AuthorityID)
+	err := user.AddUser(request)
 	if err != nil {
 		response.BadRequest(c, err.Error())
 		log.Println(err.Error())
@@ -53,6 +54,7 @@ func DeleteUser(c *gin.Context) {
 	response.Success(c)
 }
 
+// GetAllUser 返回所有用户信息
 // @Route /user/getAllUser [GET]
 func GetAllUser(c *gin.Context) {
 	page, _ := strconv.Atoi(c.DefaultQuery("page", "1"))
@@ -99,24 +101,23 @@ func SearchUserData(c *gin.Context) {
 	response.DataWtihPage(c, ret, total)
 }
 
-//UpdateUser 更新用户信息
-// @Route /updateUser [POST]
-func UpdateUser(c *gin.Context) {
+//AdminUpdateUser 更新用户信息
+// @Route /admin/updateUser [POST]
+func AdminUpdateUser(c *gin.Context) {
 	var request user.User
 	if err := c.ShouldBindJSON(&request); err != nil {
 		response.Error(c, "ShouldBindJSON："+err.Error())
 		return
 	}
-	log.Println(request)
 	if request.Password != "" {
-		err := user.UpdateUserPassword(request.UUID, request.Email, request.Password, request.AuthorityID)
+		err := user.UpdateUserPassword(request.UUID, request.Email, request.Password, "admin", request.AuthorityID)
 		if err != nil {
 			response.Error(c, err.Error())
 			return
 		}
 		response.Success(c)
 	} else {
-		err := user.UpdateUserEmail(request.UUID, request.Email, request.AuthorityID)
+		err := user.UpdateUserEmail(request.UUID, request.Email, "admin", request.AuthorityID)
 		if err != nil {
 			log.Println(err)
 			response.Error(c, err.Error())
@@ -125,4 +126,37 @@ func UpdateUser(c *gin.Context) {
 		response.Success(c)
 	}
 
+}
+
+// UserUpdate 用户更新数据
+func UserUpdate(c *gin.Context) {
+	var request user.UpdateUser
+	if err := c.ShouldBindJSON(&request); err != nil {
+		response.Error(c, "ShouldBindJSON："+err.Error())
+		return
+	}
+
+	// 检查验证码
+	err := util.CheckCode(request.Email, request.Code)
+	if err != nil {
+		response.Error(c, err.Error())
+		return
+	}
+
+	if request.Password != "" {
+		err := user.UpdateUserPassword(request.UUID, request.Email, request.Password, "user", 0)
+		if err != nil {
+			response.Error(c, err.Error())
+			return
+		}
+		response.Success(c)
+	} else {
+		err := user.UpdateUserEmail(request.UUID, request.NewEmail, "user", 0)
+		if err != nil {
+			log.Println(err)
+			response.Error(c, err.Error())
+			return
+		}
+		response.Success(c)
+	}
 }
